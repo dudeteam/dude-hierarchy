@@ -1,6 +1,9 @@
-
-<link rel="import" href="bower_components/polymer/polymer.html">
-<link rel="import" href="bower_components/iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
+<!--
+Copyright (c) 2015 DudeTeam. All rights reserved.
+Authored by Maxime Perrimond <max.perrimond@gmail.com>
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
 <link rel="import" href="magnet-hierarchy-item.html">
 
 <dom-module id="magnet-hierarchy">
@@ -33,11 +36,6 @@
                 selectItem: {
                     type: Object,
                     value: null
-                },
-
-                filter: {
-                    type: Object,
-                    value: null //TODO: Add a basic filter
                 },
 
                 items: {
@@ -112,6 +110,7 @@
              */
             loadItems: function (items) {
                 this.items = items;
+                this._clear();
                 var elements = this._load(this.items);
                 this._appendItems(this, elements);
                 Polymer.dom.flush();
@@ -242,8 +241,16 @@
                 }
             },
 
-            _itemsSearch: function (event) {
-                this.loadItems(this.filter(event.detail.arg, this.items));
+            filteredItems: function (event) {
+                this._clear();
+                this.loadItems(event.detail.items);
+            },
+
+            _clear: function () {
+                var childNodes = Polymer.dom(this).childNodes;
+                for (var i = 0; i < childNodes.length; i++) {
+                    Polymer.dom(this).removeChild(childNodes[i]);
+                }
             }
         });
     </script>
