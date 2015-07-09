@@ -26,8 +26,7 @@
 
             properties: {
                 onSelect: {
-                    type: Object,
-                    value: null
+                    type: Object
                 },
 
                 selectItem: {
@@ -158,7 +157,9 @@
 
             _itemClick: function (event) {
                 this.select(event.target);
-                this.onSelect(event.detail);
+                if (this.onSelect !== undefined) {
+                    this.onSelect(event.detail);
+                }
             },
 
             _itemsSearch: function (event) {
