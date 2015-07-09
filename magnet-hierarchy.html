@@ -1,5 +1,6 @@
 
 <link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
 <link rel="import" href="magnet-hierarchy-item.html">
 
 <dom-module id="magnet-hierarchy">
@@ -44,14 +45,20 @@
                 }
             },
 
+            behaviors: [Polymer.IronA11yKeysBehavior],
+
             listeners: {
+                "down": 'preventSelection',
                 "item-click": "_itemClick",
                 "items-search": "_itemsSearch"
             },
 
-            factoryImpl: function (onSelect, filter) {
-                this.onSelect = onSelect;
-                this.filter = filter;
+            ready: function () {
+                this.keyEventTarget = document.body;
+                this.addOwnKeyBinding("up", "_moveUpSelection");
+                this.addOwnKeyBinding("down", "_moveDownSelection");
+                this.addOwnKeyBinding("right", "_expandSelection");
+                this.addOwnKeyBinding("left", "_minimiseSelection");
             },
 
             select: function (item) {
@@ -89,23 +96,22 @@
              *          icon: "data_icon", (Optional)
              *          data: ...
              *      }},
-             *      group: {
+             *      {group: {
              *          name: "data_name",
              *          icon: "data_icon", (Optional)
              *          data: ...,
              *          items: [
-             *              item: { ... },
-             *              item: { ... },
-             *              group: { ... },
+             *              {item: { ... }},
+             *              {item: { ... }},
+             *              {group: { ... }},
              *          ],
-             *      }
+             *      }}
              *  ]
              *
              * @param items
              */
             loadItems: function (items) {
                 this.items = items;
-                console.log(JSON.stringify(this.items));
                 var elements = this._load(this.items);
                 this._appendItems(this, elements);
                 Polymer.dom.flush();
@@ -153,6 +159,80 @@
 
             moveItem: function (item, before, after) {
 
+            },
+
+            _moveUpSelection: function () {
+                var previous = Polymer.dom(this.selectItem).previousSibling;
+                if (previous !== undefined) {
+                    if (previous.group && previous.expand) {
+                        var last = this._selectLast(previous);
+                        if (last !== undefined) {
+                            this.select(last);
+                            return;
+                        }
+                    }
+                    this.select(previous);
+                    return;
+                }
+
+                var parent = Polymer.dom(this.selectItem).parentNode;
+                if (parent instanceof MagnetHierarchyItem) {
+                    this.select(parent);
+                }
+            },
+
+            _selectLast: function (item) {
+                var last;
+                if (item.group && item.expand) {
+                    last = Polymer.dom(item).lastChild;
+                    var lol = this._selectLast(last);
+                    if (lol !== undefined) {
+                        last = lol;
+                    }
+                }
+                return last;
+            },
+
+            _moveDownSelection: function () {
+                if (this.selectItem.group && this.selectItem.expand) {
+                    var first = Polymer.dom(this.selectItem).firstChild;
+                    if (first !== undefined) {
+                        this.select(first);
+                        return;
+                    }
+                }
+
+                var next = Polymer.dom(this.selectItem).nextSibling;
+                if (next !== undefined) {
+                    this.select(next);
+                    return;
+                }
+
+                var parent = Polymer.dom(this.selectItem).parentNode;
+                while (parent instanceof MagnetHierarchyItem) {
+                    next = Polymer.dom(parent).nextSibling;
+                    if (next !== undefined) {
+                        this.select(next);
+                        return;
+                    }
+                    parent = Polymer.dom(parent).parentNode;
+                }
+            },
+
+            _expandSelection: function () {
+                if (this.selectItem !== null && this.selectItem.group) {
+                    this.selectItem.expand = true;
+                }
+            },
+
+            _minimiseSelection: function () {
+                if (this.selectItem !== null && this.selectItem.group) {
+                    this.selectItem.expand = false;
+                }
+            },
+
+            preventSelection: function(e) {
+                e.preventDefault();
             },
 
             _itemClick: function (event) {

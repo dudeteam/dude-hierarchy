@@ -1,9 +1,11 @@
 
 <link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="stylesheet" type="text/css" href="bower_components/components-font-awesome/css/font-awesome.min.css">
 
 <dom-module id="magnet-hierarchy-item">
 
     <style>
+
         :host {
             display: block;
             position: relative;
@@ -12,18 +14,39 @@
             height: auto;
         }
 
-        :host(.active) > #hierarchy-item {
+        :host(.active) > #item {
             background: #0066bb;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            padding: 0 2px;
+        }
+
+        #group {
+            display: block;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        :host(:not(.expand)) > #group {
+            display: none;
         }
     </style>
 
     <template>
-        <div id="hierarchy-item">
-            <i class=""></i>
-            <i class=""></i>
+        <div id="item">
+            <div class="icon">
+                <i id="group_icon" on-click="_expandClick"></i>
+            </div>
+            <div class="icon">
+                <i id="item_icon"></i>
+            </div>
             <a class="">{{ name }}</a>
         </div>
-        <div class="hierarchy-group">
+        <div id="group">
             <content></content>
         </div>
     </template>
@@ -38,7 +61,19 @@
                 },
 
                 icon: {
-                    type: String
+                    type: String,
+                    value: "fa fa-file-o",
+                    observer: "_iconChanged"
+                },
+
+                groupIcon: {
+                    type: String,
+                    value: "fa fa-caret-right"
+                },
+
+                groupIconExpand: {
+                    type: String,
+                    value: "fa fa-caret-down"
                 },
 
                 data: {
@@ -46,29 +81,26 @@
                     value: null
                 },
 
-                selected: {
-                    type: Boolean,
-                    value: false
-                },
-
                 group: {
                     type: Boolean,
-                    value: true
+                    value: false,
+                    observer: "_groupChanged"
                 },
 
                 expand: {
                     type: Boolean,
-                    value: false
+                    value: false,
+                    observer: "_expandChanged"
                 }
             },
 
             listeners: {
+                "down": 'preventSelection',
                 "click": "_onClick"
             },
 
-            factoryImpl: function (name, icon, data) {
+            factoryImpl: function (name, data) {
                 this.name = name;
-                this.icon = icon;
                 this.data = data;
             },
 
@@ -88,11 +120,62 @@
 
             },
 
+            preventSelection: function(e) {
+                e.preventDefault();
+            },
+
             _onClick: function (event) {
                 event.stopPropagation();
                 this.fire("item-click", {
                     name: this.name,
                     data: this.data
+                });
+            },
+
+            _expandClick: function (event) {
+                event.stopPropagation();
+
+                if (this.group) {
+                    this.expand = !this.expand;
+                }
+            },
+
+            _iconChanged: function () {
+                this.$.item_icon.classList = "";
+                this._addClassesTo(this.icon, this.$.item_icon.classList);
+            },
+
+            _groupChanged: function () {
+                if (this.group) {
+                    this._addClassesTo(this.groupIcon, this.$.group_icon.classList);
+                } else {
+                    this._removeClassesTo(this.groupIcon, this.$.group_icon.classList);
+                }
+            },
+
+            _expandChanged: function () {
+                if (this.group) {
+                    if (this.expand) {
+                        this.classList.add("expand");
+                        this._removeClassesTo(this.groupIcon, this.$.group_icon.classList);
+                        this._addClassesTo(this.groupIconExpand, this.$.group_icon.classList);
+                    } else {
+                        this.classList.remove("expand");
+                        this._removeClassesTo(this.groupIconExpand, this.$.group_icon.classList);
+                        this._addClassesTo(this.groupIcon, this.$.group_icon.classList);
+                    }
+                }
+            },
+
+            _addClassesTo: function (classes, to) {
+                classes.split(" ").forEach(function (c) {
+                    to.add(c);
+                });
+            },
+
+            _removeClassesTo: function (classes, to) {
+                classes.split(" ").forEach(function (c) {
+                    to.remove(c);
                 });
             }
         });
