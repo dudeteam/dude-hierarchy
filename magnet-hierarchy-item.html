@@ -1,0 +1,95 @@
+
+<link rel="import" href="bower_components/polymer/polymer.html">
+
+<dom-module id="magnet-hierarchy-item">
+
+    <style>
+        :host {
+
+        }
+
+        :host(.selected) {
+            background: #0066bb;
+        }
+    </style>
+
+    <template>
+        <i class=""></i>
+        <i class=""></i>
+        <a class="">{{ name }}</a>
+        <div class="hierarchy-group">
+            <content></content>
+        </div>
+    </template>
+
+    <script>
+        MagnetHierarchyItem = Polymer({
+            is: "magnet-hierarchy-item",
+
+            properties: {
+                name: {
+                    type: String
+                },
+
+                icon: {
+                    type: String
+                },
+
+                data: {
+                    type: Object,
+                    value: null
+                },
+
+                selected: {
+                    type: Boolean,
+                    value: false
+                },
+
+                group: {
+                    type: Boolean,
+                    value: true
+                },
+
+                expand: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+
+            listeners: {
+                "click": "_onClick"
+            },
+
+            factoryImpl: function (name, icon, data) {
+                this.name = name;
+                this.icon = icon;
+                this.data = data;
+            },
+
+            pushItem: function (item) {
+                Polymer.dom(this).appendChild(item);
+            },
+
+            insertBeforeItem: function (item, before) {
+
+            },
+
+            removeItem: function (item) {
+
+            },
+
+            moveItem: function (item, before, after) {
+
+            },
+
+            _onClick: function (event) {
+                event.stopPropagation();
+                this.fire("item-click", {
+                    name: this.name,
+                    data: this.data
+                });
+            }
+        });
+    </script>
+
+</dom-module>

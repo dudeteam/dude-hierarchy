@@ -1,0 +1,26 @@
+{
+  "name": "magnet-hierarchy",
+  "version": "0.0.1",
+  "authors": [
+    "Maxime Perrimond <max.perrimond@gmail.com>"
+  ],
+  "description": "Polymer element to create dynamically a hierarchy",
+  "keywords": [
+    "magnet",
+    "hierarchy",
+    "polymer"
+  ],
+  "main": "magnet-hierarchy.html",
+  "license": "MIT",
+  "homepage": "https://github.com/dudeteam/magnet-hierarchy/",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0"
+  }
+}

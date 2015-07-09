@@ -1,0 +1,170 @@
+
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="magnet-hierarchy-item.html">
+
+<dom-module id="magnet-hierarchy">
+
+    <style>
+
+        :host {
+            display: block;
+            position: relative;
+
+            width: auto;
+            height: auto;
+        }
+
+    </style>
+
+    <template>
+        <content></content>
+    </template>
+
+    <script>
+        MagnetHierarchy = Polymer({
+            is: "magnet-hierarchy",
+
+            properties: {
+                onSelect: {
+                    type: Object,
+                    value: null
+                },
+
+                selectItem: {
+                    type: Object,
+                    value: null
+                },
+
+                filter: {
+                    type: Object,
+                    value: null //TODO: Add a basic filter
+                },
+
+                items: {
+                    type: Array
+                }
+            },
+
+            listeners: {
+                "item-click": "_itemClick",
+                "items-search": "_itemsSearch"
+            },
+
+            factoryImpl: function (onSelect, filter) {
+                this.onSelect = onSelect;
+                this.filter = filter;
+            },
+
+            select: function (item) {
+                if (!(item instanceof MagnetHierarchyItem)) {
+                    if (typeof item === "string") {
+                        if (this.items.every(function (i) {
+                            if (i.name === item) {
+                                item = i;
+                                return false;
+                            }
+                            return true;
+                        })) {
+                            item = null;
+                        }
+                    }
+                }
+
+                if (item !== null) {
+                    if (item !== this.selectItem) {
+                        if (this.selectItem !== null) {
+                            this.selectItem.classList.remove("active");
+                        }
+                        this.selectItem = item;
+                        this.selectItem.classList.add("active");
+                    }
+                }
+            },
+
+            /**
+             * Load the hierarchy on items given.
+             * Format:
+             *  [
+             *      {item: {
+             *          name: "data_name",
+             *          icon: "data_icon", (Optional)
+             *          data: ...
+             *      }},
+             *      group: {
+             *          name: "data_name",
+             *          icon: "data_icon", (Optional)
+             *          data: ...,
+             *          items: [
+             *              item: { ... },
+             *              item: { ... },
+             *              group: { ... },
+             *          ],
+             *      }
+             *  ]
+             *
+             * @param items
+             */
+            loadItems: function (items) {
+                this.items = items;
+                console.log(JSON.stringify(this.items));
+                var elements = this._load(this.items);
+                this._appendItems(this, elements);
+                Polymer.dom.flush();
+            },
+
+            _load: function (items) {
+                var elements = [];
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i].item;
+                    var group = false;
+                    if (item === undefined) {
+                        item = items[i].group;
+                        if (item === undefined) {
+                            continue;
+                        }
+                        group = true;
+                    }
+                    var element = new MagnetHierarchyItem(item.name, item.icon, item.data);
+                    if (group) {
+                        element.group = true;
+                        this._appendItems(element, this._load(item.items));
+                    }
+                    elements.push(element);
+                }
+                return elements;
+            },
+
+            _appendItems: function (parent, items) {
+                for (var i = 0; i < items.length; i++) {
+                    parent.pushItem(items[i]);
+                }
+            },
+
+            pushItem: function (item) {
+                Polymer.dom(this).appendChild(item);
+            },
+
+            insertBeforeItem: function (item, before) {
+
+            },
+
+            removeItem: function (item) {
+
+            },
+
+            moveItem: function (item, before, after) {
+
+            },
+
+            _itemClick: function (event) {
+                this.select(event.target);
+                this.onSelect(event.detail);
+            },
+
+            _itemsSearch: function (event) {
+                this.loadItems(this.filter(event.detail.arg, this.items));
+            }
+        });
+    </script>
+
+</dom-module>
