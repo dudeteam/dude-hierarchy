@@ -15,10 +15,14 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             width: auto;
             height: auto;
+
+            @apply(--magnet-hierarchy-item)
         }
 
         :host(.active) > #item {
             background: #214283;
+
+            @apply(--magnet-hierarchy-selection)
         }
 
         .icon {
@@ -40,6 +44,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
        #name > span {
             background-color: #155221;
+
+            @apply(--magnet-hierarchy-occurence)
         }
     </style>
 
