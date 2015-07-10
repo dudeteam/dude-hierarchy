@@ -21,6 +21,9 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
     </style>
 
     <template>
+        <label>
+            <input type="text" value="{{argument::input}}">
+        </label>
         <content></content>
     </template>
 
@@ -38,6 +41,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     value: null
                 },
 
+                argument: {
+                    type: String,
+                    observer: "_search"
+                },
+
                 items: {
                     type: Array
                 }
@@ -46,7 +54,6 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             behaviors: [Polymer.IronA11yKeysBehavior],
 
             listeners: {
-                "down": 'preventSelection',
                 "item-click": "_itemClick",
                 "items-search": "_itemsSearch"
             },
@@ -90,19 +97,19 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
              * Format:
              *  [
              *      {item: {
-             *          name: "data_name",
-             *          icon: "data_icon", (Optional)
+             *          name: "name",
+             *          icon: "icon", (Optional)
              *          data: ...
              *      }},
              *      {group: {
-             *          name: "data_name",
-             *          icon: "data_icon", (Optional)
+             *          name: "name",
+             *          icon: "icon", (Optional)
              *          data: ...,
              *          items: [
              *              {item: { ... }},
              *              {item: { ... }},
-             *              {group: { ... }},
-             *          ],
+             *              {group: { ... }}
+             *          ]
              *      }}
              *  ]
              *
@@ -128,9 +135,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                         }
                         group = true;
                     }
-                    var element = new MagnetHierarchyItem(item.name, item.icon, item.data);
+                    var element = new MagnetHierarchyItem(item.name, item.data);
+                    if (item.icon !== undefined) {element.icon = item.icon; }
                     if (group) {
                         element.group = true;
+                        if (item.expand !== undefined) {element.expand = item.expand; }
                         this._appendItems(element, this._load(item.items));
                     }
                     elements.push(element);
@@ -230,10 +239,6 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 }
             },
 
-            preventSelection: function(e) {
-                e.preventDefault();
-            },
-
             _itemClick: function (event) {
                 this.select(event.target);
                 if (this.onSelect !== undefined) {
@@ -241,15 +246,51 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 }
             },
 
-            filteredItems: function (event) {
+            _search: function () {
                 this._clear();
-                this.loadItems(event.detail.items);
+                var elements;
+                if (this.argument) {
+                    elements = this._load(this._filter(this.argument));
+                } else {
+                    elements = this._load(this.items);
+                }
+                this._appendItems(this, elements);
+                Polymer.dom.flush();
+            },
+
+            _filter: function (argument) {
+                var result = JSON.parse(JSON.stringify(this.items));
+                this._filterItems(argument, result);
+                return result;
+            },
+
+            _filterItems: function (argument, items) {
+                for (var i = 0; i < items.length; i++) {
+                    var item;
+                    if (items[i].group) {
+                        items[i].group.expand = true;
+                        item = items[i].group;
+                        this._filterItems(argument, item.items);
+                    } else {
+                        item = items[i].item;
+                    }
+
+                    var find = item.name.search(argument);
+                    if (find !== -1) {
+                        item.name = [
+                            item.name.slice(0, find),
+                            "<span class=\"magnet-hierarchy-item\">",
+                            item.name.slice(find, find + argument.length),
+                            "</span>",
+                            item.name.slice(find+argument.length)
+                        ].join("");
+                    }
+                }
             },
 
             _clear: function () {
-                var childNodes = Polymer.dom(this).childNodes;
-                for (var i = 0; i < childNodes.length; i++) {
-                    Polymer.dom(this).removeChild(childNodes[i]);
+                while (Polymer.dom(this).childNodes.length > 0) {
+                    Polymer.dom(this).removeChild(Polymer.dom(this).firstChild);
                 }
             }
         });

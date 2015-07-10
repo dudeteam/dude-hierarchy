@@ -18,7 +18,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
         }
 
         :host(.active) > #item {
-            background: #0066bb;
+            background: #214283;
         }
 
         .icon {
@@ -37,6 +37,10 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
         :host(:not(.expand)) > #group {
             display: none;
         }
+
+       #name > span {
+            background-color: #155221;
+        }
     </style>
 
     <template>
@@ -47,7 +51,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             <div class="icon">
                 <i id="item_icon"></i>
             </div>
-            <a class="">{{ name }}</a>
+            <a id="name"></a>
         </div>
         <div id="group">
             <content></content>
@@ -60,7 +64,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             properties: {
                 name: {
-                    type: String
+                    type: String,
+                    observer: "_nameChanged"
                 },
 
                 icon: {
@@ -141,6 +146,10 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 if (this.group) {
                     this.expand = !this.expand;
                 }
+            },
+
+            _nameChanged: function () {
+                this.$.name.innerHTML = this.name;
             },
 
             _iconChanged: function () {
