@@ -15,9 +15,7 @@
   "homepage": "https://github.com/dudeteam/magnet-hierarchy/",
   "ignore": [
     "bower_components",
-    "/.*",
-    "/test/",
-    "/demo/"
+    "/.*"
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
