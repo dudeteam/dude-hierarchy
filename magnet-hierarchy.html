@@ -284,13 +284,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             _search: function () {
                 this._clear();
-                var elements;
-                if (this.searchPattern) {
-                    elements = this._load(this._filter(this.searchPattern));
-                } else {
-                    elements = this._load(this.items);
-                }
-                this._appendItems(this, elements);
+                this._appendItems(this, this._load(this._filter(this.searchPattern)));
                 Polymer.dom.flush();
             },
 
