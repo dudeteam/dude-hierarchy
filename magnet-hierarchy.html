@@ -153,11 +153,12 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             _load: function (items) {
                 this._foundOne = false;
-                return this._loadRecurse(items);
+                return this._loadRecurse(items).elements;
             },
 
             _loadRecurse: function (items) {
                 var elements = [];
+                var foundInGroup = false;
                 for (var i = 0; i < items.length; i++) {
                     var item = items[i].item;
                     var group = false;
@@ -169,9 +170,17 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                         group = true;
                     }
                     var element = new MagnetHierarchyItem(item.name, item.data);
-                    if (!this._foundOne && item.name.indexOf(this.searchPattern) !== -1) {
-                        this.select(element);
-                        this._foundOne = true;
+                    if (!this.searchPattern || !this.searchPattern.length) {
+                        element.match = true;
+                    } else {
+                        element.match = item.name.indexOf(this.searchPattern) !== -1;
+                    }
+                    if (item.name.indexOf(this.searchPattern) !== -1) {
+                        if (!this._foundOne) {
+                            this.select(element);
+                            this._foundOne = true;
+                        }
+                        foundInGroup = true;
                     }
                     if (item.html !== undefined) {
                         element.html = item.html;
@@ -181,12 +190,23 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     }
                     if (group) {
                         element.group = true;
-                        if (item.expand !== undefined) {element.expand = item.expand; }
-                        this._appendItems(element, this._loadRecurse(item.items));
+                        if (item.expand !== undefined) {
+                            element.expand = item.expand;
+                        }
+                        var result = this._loadRecurse(item.items);
+                        this._appendItems(element, result.elements);
+                        if (!this.searchPattern || !this.searchPattern.length) {
+                            element.match = true;
+                        } else {
+                            element.match = item.name.indexOf(this.searchPattern) !== -1 || result.foundInGroup;
+                        }
                     }
                     elements.push(element);
                 }
-                return elements;
+                return {
+                    elements: elements,
+                    foundInGroup: foundInGroup
+                };
             },
 
             _appendItems: function (parent, items) {

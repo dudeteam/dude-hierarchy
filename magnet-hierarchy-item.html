@@ -20,7 +20,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
         }
 
         :host(.active) > #item {
-            background: #214283;
+            background: #222222;
 
             @apply(--magnet-hierarchy-selection)
         }
@@ -47,14 +47,14 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
         }
 
        #name > span {
-            background-color: #155221;
+            color: #eeeeee;
 
             @apply(--magnet-hierarchy-occurence)
         }
     </style>
 
     <template>
-        <div id="item">
+        <div id="item" hidden$="{{!match}}">
             <div class="icon">
                 <i id="group_icon" on-click="_expandClick"></i>
             </div>
@@ -81,6 +81,14 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 html: {
                     type: String,
                     observer: "_htmlChanged"
+                },
+
+                /**
+                 * Whether the item matches the searchPattern of the hierarchy.
+                 * @type {Boolean}
+                 */
+                match: {
+                    type: Boolean
                 },
 
                 icon: {
