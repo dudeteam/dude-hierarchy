@@ -65,6 +65,9 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     value: null
                 },
 
+                /**
+                 * @type {String}
+                 */
                 searchPattern: {
                     type: String,
                     observer: "_search"
@@ -149,6 +152,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _load: function (items) {
+                this._foundOne = false;
+                return this._loadRecurse(items);
+            },
+
+            _loadRecurse: function (items) {
                 var elements = [];
                 for (var i = 0; i < items.length; i++) {
                     var item = items[i].item;
@@ -161,6 +169,10 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                         group = true;
                     }
                     var element = new MagnetHierarchyItem(item.name, item.data);
+                    if (!this._foundOne && item.name.indexOf(this.searchPattern) !== -1) {
+                        this.select(element);
+                        this._foundOne = true;
+                    }
                     if (item.html !== undefined) {
                         element.html = item.html;
                     }
@@ -170,7 +182,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     if (group) {
                         element.group = true;
                         if (item.expand !== undefined) {element.expand = item.expand; }
-                        this._appendItems(element, this._load(item.items));
+                        this._appendItems(element, this._loadRecurse(item.items));
                     }
                     elements.push(element);
                 }
@@ -293,7 +305,6 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _filterItems: function (searchPattern, items) {
-                var filteredItems = [];
                 for (var i = 0; i < items.length; i++) {
                     var item;
                     if (items[i].group) {
@@ -313,7 +324,6 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                             "</span>",
                             item.name.slice(find+searchPattern.length)
                         ].join("");
-                        filteredItems.push(item);
                     }
                 }
                 return items;
