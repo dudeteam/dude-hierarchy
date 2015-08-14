@@ -44,6 +44,9 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 var magnetHierarchy = new MagnetHierarchy();
                 magnetHierarchy.loadItems(this.hierarchy);
                 Polymer.dom(this).appendChild(magnetHierarchy);
+                magnetHierarchy.addEventListener("submit", function (e) {
+                    console.log("Submitted: ", e.detail.item && e.detail.item.name);
+                });
             }
         })
 

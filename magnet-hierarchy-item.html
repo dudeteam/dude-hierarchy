@@ -78,6 +78,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     observer: "_nameChanged"
                 },
 
+                html: {
+                    type: String,
+                    observer: "_htmlChanged"
+                },
+
                 icon: {
                     type: String,
                     value: "fa fa-file-o",
@@ -159,7 +164,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _nameChanged: function () {
-                this.$.name.innerHTML = this.name;
+                this.html = this.name;
+            },
+
+            _htmlChanged: function () {
+                this.$.name.innerHTML = this.html;
             },
 
             _iconChanged: function () {

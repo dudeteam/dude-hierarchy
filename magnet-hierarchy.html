@@ -46,7 +46,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
     <template>
         <label>
-            <input id="searchInput" type="text" value="{{argument::input}}">
+            <input id="searchInput" type="text" value="{{searchPattern::input}}">
         </label>
         <content></content>
     </template>
@@ -65,7 +65,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     value: null
                 },
 
-                argument: {
+                searchPattern: {
                     type: String,
                     observer: "_search"
                 },
@@ -88,6 +88,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 this.addOwnKeyBinding("down", "_moveDownSelection");
                 this.addOwnKeyBinding("right", "_expandSelection");
                 this.addOwnKeyBinding("left", "_minimiseSelection");
+                this.addOwnKeyBinding("enter", "_submitSelection");
             },
 
             select: function (item) {
@@ -160,7 +161,12 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                         group = true;
                     }
                     var element = new MagnetHierarchyItem(item.name, item.data);
-                    if (item.icon !== undefined) {element.icon = item.icon; }
+                    if (item.html !== undefined) {
+                        element.html = item.html;
+                    }
+                    if (item.icon !== undefined) {
+                        element.icon = item.icon;
+                    }
                     if (group) {
                         element.group = true;
                         if (item.expand !== undefined) {element.expand = item.expand; }
@@ -263,6 +269,12 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 }
             },
 
+            _submitSelection: function () {
+                this.fire("submit", {
+                    item: this.selectItem
+                });
+            },
+
             _itemClick: function (event) {
                 this.select(event.target);
                 if (this.onSelect !== undefined) {
@@ -273,8 +285,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             _search: function () {
                 this._clear();
                 var elements;
-                if (this.argument) {
-                    elements = this._load(this._filter(this.argument));
+                if (this.searchPattern) {
+                    elements = this._load(this._filter(this.searchPattern));
                 } else {
                     elements = this._load(this.items);
                 }
@@ -282,34 +294,35 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 Polymer.dom.flush();
             },
 
-            _filter: function (argument) {
-                var result = JSON.parse(JSON.stringify(this.items));
-                this._filterItems(argument, result);
-                return result;
+            _filter: function (searchPattern) {
+                return this._filterItems(searchPattern, this.items);
             },
 
-            _filterItems: function (argument, items) {
+            _filterItems: function (searchPattern, items) {
+                var filteredItems = [];
                 for (var i = 0; i < items.length; i++) {
                     var item;
                     if (items[i].group) {
                         items[i].group.expand = true;
                         item = items[i].group;
-                        this._filterItems(argument, item.items);
+                        this._filterItems(searchPattern, item.items);
                     } else {
                         item = items[i].item;
                     }
 
-                    var find = item.name.search(argument);
+                    var find = item.name.indexOf(searchPattern);
                     if (find !== -1) {
-                        item.name = [
+                        item.html = [
                             item.name.slice(0, find),
                             "<span class=\"magnet-hierarchy-item\">",
-                            item.name.slice(find, find + argument.length),
+                            item.name.slice(find, find + searchPattern.length),
                             "</span>",
-                            item.name.slice(find+argument.length)
+                            item.name.slice(find+searchPattern.length)
                         ].join("");
+                        filteredItems.push(item);
                     }
                 }
+                return items;
             },
 
             _clear: function () {
