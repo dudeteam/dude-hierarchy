@@ -153,7 +153,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             _load: function (items) {
                 this._foundOne = false;
-                return this._loadRecurse(items).elements;
+                var elements = this._loadRecurse(items).elements;
+                if (!this._foundOne) {
+                    this.select(elements[0]);
+                }
+                return elements;
             },
 
             _loadRecurse: function (items) {
