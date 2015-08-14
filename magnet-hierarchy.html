@@ -24,15 +24,29 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             @apply(--magnet-hierarchy-search-label)
         }
 
-        :host > input {
-            @apply(--magnet-hierarchy-search-input)
+        #searchInput {
+            margin-bottom: 10px;
+            padding: 5px;
+            outline: none;
+            border: none;
+            width: 100%;
+            box-sizing: border-box;
+            background: transparent;
+            border-bottom: 2px solid #555555;
+            color: var(--cg-text-color);
+            font-family: var(--cg-display-font);
+            font-size: 1em;
+        @apply(--magnet-hierarchy-search-input);
+        }
+        #searchInput:focus {
+            border-bottom: 2px solid var(--cg-primary-color);
         }
 
     </style>
 
     <template>
         <label>
-            <input type="text" value="{{argument::input}}">
+            <input id="searchInput" type="text" value="{{argument::input}}">
         </label>
         <content></content>
     </template>
