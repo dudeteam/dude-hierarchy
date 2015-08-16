@@ -11,12 +11,13 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
     <style>
 
         :host {
-            display: block;
             position: relative;
-
-            width: auto;
-            height: auto;
-
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: stretch;
+            flex: 1;
             @apply(--magnet-hierarchy)
         }
 
@@ -33,13 +34,13 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             box-sizing: border-box;
             background: transparent;
             border-bottom: 2px solid #555555;
-            color: var(--cg-text-color);
-            font-family: var(--cg-display-font);
+            color: var(--text-color);
+            font-family: var(--display-font);
             font-size: 1em;
-        @apply(--magnet-hierarchy-search-input);
+            @apply(--magnet-hierarchy-search-input);
         }
         #searchInput:focus {
-            border-bottom: 2px solid var(--cg-primary-color);
+            border-bottom: 2px solid var(--primary-color);
         }
 
     </style>
@@ -60,7 +61,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     type: Object
                 },
 
-                selectItem: {
+                selectedItem: {
                     type: Object,
                     value: null
                 },
@@ -81,8 +82,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             behaviors: [Polymer.IronA11yKeysBehavior],
 
             listeners: {
-                "item-click": "_itemClick",
-                "items-search": "_itemsSearch"
+                "item-click": "_itemClick"
             },
 
             ready: function () {
@@ -110,12 +110,12 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 }
 
                 if (item !== null) {
-                    if (item !== this.selectItem) {
-                        if (this.selectItem !== null) {
-                            this.selectItem.classList.remove("active");
+                    if (item !== this.selectedItem) {
+                        if (this.selectedItem !== null) {
+                            this.selectedItem.classList.remove("active");
                         }
-                        this.selectItem = item;
-                        this.selectItem.classList.add("active");
+                        this.selectedItem = item;
+                        this.selectedItem.classList.add("active");
                     }
                 }
             },
@@ -151,16 +151,17 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 Polymer.dom.flush();
             },
 
-            _load: function (items) {
+            _load: function (items, filtered) {
                 this._foundOne = false;
-                var elements = this._loadRecurse(items).elements;
+                var elements = this._loadRecurse(items, filtered).elements;
                 if (!this._foundOne) {
                     this.select(elements[0]);
                 }
                 return elements;
             },
 
-            _loadRecurse: function (items) {
+            _loadRecurse: function (items, filtered) {
+                filtered = filtered === undefined ? false : filtered;
                 var elements = [];
                 var foundInGroup = false;
                 for (var i = 0; i < items.length; i++) {
@@ -174,17 +175,15 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                         group = true;
                     }
                     var element = new MagnetHierarchyItem(item.name, item.data);
-                    if (!this.searchPattern || !this.searchPattern.length) {
-                        element.match = true;
-                    } else {
-                        element.match = item.name.indexOf(this.searchPattern) !== -1;
-                    }
-                    if (item.name.indexOf(this.searchPattern) !== -1) {
-                        if (!this._foundOne) {
-                            this.select(element);
-                            this._foundOne = true;
+                    if (filtered) {
+                        if (item.name.indexOf(this.searchPattern) !== -1) {
+                            element.match = true;
+                            if (!this._foundOne) {
+                                this.select(element);
+                                this._foundOne = true;
+                            }
+                            foundInGroup = true;
                         }
-                        foundInGroup = true;
                     }
                     if (item.html !== undefined) {
                         element.html = item.html;
@@ -197,14 +196,13 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                         if (item.expand !== undefined) {
                             element.expand = item.expand;
                         }
-                        var result = this._loadRecurse(item.items);
+                        var result = this._loadRecurse(item.items, filtered);
                         this._appendItems(element, result.elements);
-                        if (!this.searchPattern || !this.searchPattern.length) {
-                            element.match = true;
-                        } else {
+                        if (filtered) {
                             element.match = item.name.indexOf(this.searchPattern) !== -1 || result.foundInGroup;
                         }
                     }
+                    element.filtered = filtered;
                     elements.push(element);
                 }
                 return {
@@ -236,7 +234,10 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _moveUpSelection: function () {
-                var previous = Polymer.dom(this.selectItem).previousSibling;
+                var previous = Polymer.dom(this.selectedItem).previousSibling;
+                while (previous !== undefined && (previous.filtered && !previous.match)) {
+                    previous = Polymer.dom(previous).previousSibling;
+                }
                 if (previous !== undefined) {
                     if (previous.group && previous.expand) {
                         var last = this._selectLast(previous);
@@ -249,7 +250,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     return;
                 }
 
-                var parent = Polymer.dom(this.selectItem).parentNode;
+                var parent = Polymer.dom(this.selectedItem).parentNode;
                 if (parent instanceof MagnetHierarchyItem) {
                     this.select(parent);
                 }
@@ -259,6 +260,9 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 var last;
                 if (item.group && item.expand) {
                     last = Polymer.dom(item).lastChild;
+                    while (last !== undefined && (last.filtered && !last.match)) {
+                        last = Polymer.dom(last).previousSibling;
+                    }
                     var lol = this._selectLast(last);
                     if (lol !== undefined) {
                         last = lol;
@@ -268,23 +272,34 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _moveDownSelection: function () {
-                if (this.selectItem.group && this.selectItem.expand) {
-                    var first = Polymer.dom(this.selectItem).firstChild;
+                if (this.selectedItem.group && this.selectedItem.expand) {
+                    var first = Polymer.dom(this.selectedItem).firstChild;
                     if (first !== undefined) {
-                        this.select(first);
-                        return;
+                        while (first !== undefined && (first.filtered && !first.match)) {
+                            first = Polymer.dom(first).nextSibling;
+                        }
+                        if (first !== undefined) {
+                            this.select(first);
+                            return;
+                        }
                     }
                 }
 
-                var next = Polymer.dom(this.selectItem).nextSibling;
+                var next = Polymer.dom(this.selectedItem).nextSibling;
+                while (next !== undefined && (next.filtered && !next.match)) {
+                    next = Polymer.dom(next).nextSibling;
+                }
                 if (next !== undefined) {
                     this.select(next);
                     return;
                 }
 
-                var parent = Polymer.dom(this.selectItem).parentNode;
+                var parent = Polymer.dom(this.selectedItem).parentNode;
                 while (parent instanceof MagnetHierarchyItem) {
                     next = Polymer.dom(parent).nextSibling;
+                    while (next !== undefined && (next.filtered && !next.match)) {
+                        next = Polymer.dom(next).nextSibling;
+                    }
                     if (next !== undefined) {
                         this.select(next);
                         return;
@@ -294,20 +309,20 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _expandSelection: function () {
-                if (this.selectItem !== null && this.selectItem.group) {
-                    this.selectItem.expand = true;
+                if (this.selectedItem !== null && this.selectedItem.group) {
+                    this.selectedItem.expand = true;
                 }
             },
 
             _minimiseSelection: function () {
-                if (this.selectItem !== null && this.selectItem.group) {
-                    this.selectItem.expand = false;
+                if (this.selectedItem !== null && this.selectedItem.group) {
+                    this.selectedItem.expand = false;
                 }
             },
 
             _submitSelection: function () {
                 this.fire("submit", {
-                    item: this.selectItem
+                    item: this.selectedItem
                 });
             },
 
@@ -320,7 +335,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             _search: function () {
                 this._clear();
-                this._appendItems(this, this._load(this._filter(this.searchPattern)));
+                this._appendItems(this, this._load(this._filter(this.searchPattern), this.searchPattern.length > 0));
                 Polymer.dom.flush();
             },
 

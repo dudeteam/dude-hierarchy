@@ -10,13 +10,26 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
     <style>
 
         :host {
-            display: block;
             position: relative;
-
-            width: auto;
-            height: auto;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: stretch;
 
             @apply(--magnet-hierarchy-item)
+        }
+
+        #item {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: stretch;
+        }
+
+        :host(.hidden) {
+            display: none !important;
         }
 
         :host(.active) > #item {
@@ -37,16 +50,20 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
         }
 
         #group {
-            display: block;
-            position: relative;
             padding-left: 24px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: stretch;
         }
 
         :host(:not(.expand)) > #group {
             display: none;
         }
 
-       #name > span {
+        #name > span {
             color: #eeeeee;
 
             @apply(--magnet-hierarchy-occurence)
@@ -54,7 +71,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
     </style>
 
     <template>
-        <div id="item" hidden$="{{!match}}">
+        <div id="item">
             <div class="icon">
                 <i id="group_icon" on-click="_expandClick"></i>
             </div>
@@ -88,7 +105,14 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                  * @type {Boolean}
                  */
                 match: {
-                    type: Boolean
+                    type: Boolean,
+                    value: false
+                },
+
+                filtered: {
+                    type: Boolean,
+                    value: false,
+                    observer: "_filteredChanged"
                 },
 
                 icon: {
@@ -177,6 +201,14 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             _htmlChanged: function () {
                 this.$.name.innerHTML = this.html;
+            },
+
+            _filteredChanged: function () {
+                if (this.filtered && !this.match) {
+                    this.classList.add("hidden");
+                } else {
+                    this.classList.remove("hidden");
+                }
             },
 
             _iconChanged: function () {
