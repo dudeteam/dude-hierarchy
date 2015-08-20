@@ -8,7 +8,7 @@ Polymer element to create dynamically a hierarchy
 * Handle arrow keys
 * Dynamic search and high light occurrence
 * Style customisation
-## TODO
 * Search: delete items that not have occurrence
+## TODO
 * Multi-selection
 * Drag and drop

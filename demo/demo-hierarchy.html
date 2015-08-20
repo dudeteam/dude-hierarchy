@@ -3,6 +3,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 Authored by Maxime Perrimond <max.perrimond@gmail.com>
 -->
 <link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
 <link rel="import" href="../magnet-hierarchy.html">
 
 <dom-module id="demo-hierarchy">
@@ -34,6 +35,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                                 {item: {name: "item5.5.2", data: "item5.5.2"}}
                             ]}}
                         ]}},
+                        {group: {name: "empty_folder", data: "empty"}},
                         {item: {name: "item6", data: "item6"}},
                         {item: {name: "item7", data: "item7"}},
                         {group: {name: "test_folder", items: [
@@ -42,16 +44,50 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                             {item: {name: "item2", data: "item2"}}
                         ]}}
                     ]
+                },
+
+                magnetHierarchy: {
+                    type: Object,
+                    value: new MagnetHierarchy()
                 }
             },
 
+            behaviors: [Polymer.IronA11yKeysBehavior],
+
             ready: function () {
-                var magnetHierarchy = new MagnetHierarchy();
-                magnetHierarchy.loadItems(this.hierarchy);
-                Polymer.dom(this).appendChild(magnetHierarchy);
-                magnetHierarchy.addEventListener("submit", function (e) {
+                console.log("bite");
+                this.keyEventTarget = document.body;
+                this.addOwnKeyBinding("up", "_up");
+                this.addOwnKeyBinding("down", "_down");
+                this.addOwnKeyBinding("right", "_right");
+                this.addOwnKeyBinding("left", "_left");
+                this.addOwnKeyBinding("enter", "_submit");
+
+                this.magnetHierarchy.loadItems(this.hierarchy);
+                Polymer.dom(this).appendChild(this.magnetHierarchy);
+                this.magnetHierarchy.addEventListener("submit", function (e) {
                     console.log("Submitted: ", e.detail.item && e.detail.item.name);
                 });
+            },
+
+            _up: function () {
+                this.magnetHierarchy.goUp();
+            },
+
+            _down: function () {
+                this.magnetHierarchy.goDown();
+            },
+
+            _right: function () {
+                this.magnetHierarchy.goRight();
+            },
+
+            _left: function () {
+                this.magnetHierarchy.goLeft();
+            },
+
+            _submit: function () {
+                this.magnetHierarchy.submit();
             }
         })
 

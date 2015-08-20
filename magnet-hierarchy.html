@@ -3,7 +3,6 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 Authored by Maxime Perrimond <max.perrimond@gmail.com>
 -->
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
 <link rel="import" href="magnet-hierarchy-item.html">
 
 <dom-module id="magnet-hierarchy">
@@ -79,19 +78,28 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 }
             },
 
-            behaviors: [Polymer.IronA11yKeysBehavior],
-
             listeners: {
                 "item-click": "_itemClick"
             },
 
-            ready: function () {
-                this.keyEventTarget = document.body;
-                this.addOwnKeyBinding("up", "_moveUpSelection");
-                this.addOwnKeyBinding("down", "_moveDownSelection");
-                this.addOwnKeyBinding("right", "_expandSelection");
-                this.addOwnKeyBinding("left", "_minimiseSelection");
-                this.addOwnKeyBinding("enter", "_submitSelection");
+            goUp: function () {
+                this._moveUpSelection();
+            },
+
+            goDown: function () {
+                this._moveDownSelection();
+            },
+
+            goRight: function () {
+                this._expandSelection();
+            },
+
+            goLeft: function () {
+                this._minimiseSelection();
+            },
+
+            submit: function () {
+                this._submitSelection();
             },
 
             select: function (item) {
@@ -196,6 +204,9 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                         if (item.expand !== undefined) {
                             element.expand = item.expand;
                         }
+                        if (item.items == undefined) {
+                            item.items = [];
+                        }
                         var result = this._loadRecurse(item.items, filtered);
                         this._appendItems(element, result.elements);
                         if (filtered) {
@@ -257,8 +268,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _selectLast: function (item) {
-                var last;
-                if (item.group && item.expand) {
+                var last = item;
+                if (item.group && item.expand && Polymer.dom(item).lastElementChild !== undefined) {
                     last = Polymer.dom(item).lastChild;
                     while (last !== undefined && (last.filtered && !last.match)) {
                         last = Polymer.dom(last).previousSibling;
@@ -315,8 +326,15 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _minimiseSelection: function () {
-                if (this.selectedItem !== null && this.selectedItem.group) {
-                    this.selectedItem.expand = false;
+                if (this.selectedItem !== null) {
+                    if (this.selectedItem.group && this.selectedItem.expand) {
+                        this.selectedItem.expand = false;
+                    } else {
+                        var parent = Polymer.dom(this.selectedItem).parentNode;
+                        if (parent instanceof MagnetHierarchyItem) {
+                            this.select(parent);
+                        }
+                    }
                 }
             },
 
