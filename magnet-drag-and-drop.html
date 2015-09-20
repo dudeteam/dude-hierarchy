@@ -87,7 +87,7 @@ Authored by Dorian Pinaud <dorian.pinaud@gmail.com>
               console.log("finish track on", this);
               var hover = event.detail.hover();
               hover = this._checkDragNDropElement(hover);
-              if (hover === null) {
+              if (hover === null || hover === this) {
                   return;
               }
               var parentCurrent = this.parentElement;

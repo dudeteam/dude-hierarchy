@@ -74,7 +74,9 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     console.log("Submitted: ", e.detail.item && e.detail.item.name);
                 });
                 var image = new Image(50, 50);
-                Polymer.dom(this).appendChild(image);
+                var dd = new MagnetDragAndDrop();
+                Polymer.dom(this).appendChild(dd);
+                dd.appendChild(image);
             },
 
             _up: function () {
