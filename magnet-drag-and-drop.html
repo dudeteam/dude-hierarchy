@@ -27,19 +27,25 @@ Authored by Dorian Pinaud <dorian.pinaud@gmail.com>
       is: "magnet-drag-and-drop",
 
       properties: {
-        x: {
-          type: Number,
-          value: undefined
-        },
+          name: {
+            type: String,
+            value: "droppable",
+            readOnly: true
+          },
 
-        y: {
-          type: Number,
-          value: undefined
-        }
+          x: {
+            type: Number,
+            value: undefined
+          },
+
+          y: {
+            type: Number,
+            value: undefined
+          }
       },
 
       listeners: {
-        "track": "_onTrack"
+          "track": "_onTrack"
       },
 
       ready: function() {
@@ -47,17 +53,27 @@ Authored by Dorian Pinaud <dorian.pinaud@gmail.com>
       },
 
       _coordinatesChanged: function () {
-        var x = this.trackEvent.dx;
-        var y = this.trackEvent.dy;
-        console.log(x, y);
+          var x = this.trackEvent.dx;
+          var y = this.trackEvent.dy;
+          console.log(x, y);
+      },
 
+      _checkDragNDropElement: function (node) {
+          if (node.name === "droppable") {
+              return node;
+          }
+          var parentNode = node.parentElement;
+          if (parentNode !== null) {
+              return this._checkDragNDropElement(parentNode);
+          }
+          return null;
       },
 
       _onTrack: function (event) {
         switch (event.detail.state) {
           case "start":
-                this.x = 0;
-                this.y = 0;
+              this.x = 0;
+              this.y = 0;
           break;
           case "track":
               this.x += event.detail.ddx;
@@ -68,6 +84,20 @@ Authored by Dorian Pinaud <dorian.pinaud@gmail.com>
               this.x = 0;
               this.y = 0;
               this.style.transform = 'translate(' + this.x + 'px, ' + this.y + 'px)';
+              console.log("finish track on", this);
+              var hover = event.detail.hover();
+              hover = this._checkDragNDropElement(hover);
+              if (hover === null) {
+                  return;
+              }
+              var parentCurrent = this.parentElement;
+              if (parentCurrent !== null) {
+                  parentCurrent.removeChild(this);
+              }
+              var parentHover = hover.parentElement;
+              if (parentHover !== null) {
+                  parentHover.insertBefore(this, hover);
+              }
           break;
         }
 

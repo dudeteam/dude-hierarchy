@@ -74,9 +74,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     console.log("Submitted: ", e.detail.item && e.detail.item.name);
                 });
                 var image = new Image(50, 50);
-                //image.src = "https://appharbor.com/assets/images/stackoverflow-logo.png";
-                Polymer.dom(this).appendChild(this.magnetDragAndDrop);
-                this.magnetDragAndDrop.appendChild(image);
+                Polymer.dom(this).appendChild(image);
             },
 
             _up: function () {
