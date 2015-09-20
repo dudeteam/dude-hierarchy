@@ -1,0 +1,78 @@
+<!--
+Copyright (c) 2015 DudeTeam. All rights reserved.
+Authored by Dorian Pinaud <dorian.pinaud@gmail.com>
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="stylesheet" type="text/css" href="../components-font-awesome/css/font-awesome.min.css">
+
+<<dom-module id="magnet-drag-and-drop">
+  <style>
+    :host {
+      display: flex;
+      position: relative;
+    }
+
+    :host(:hover) {
+      opacity: 0.5;
+      transition: opacity 420ms ease-in-out;
+    }
+
+  </style>
+  <template>
+    <content></content>
+  </template>
+  <script>
+    MagnetDragAndDrop = Polymer({
+      is: "magnet-drag-and-drop",
+
+      properties: {
+        x: {
+          type: Number,
+          value: undefined
+        },
+
+        y: {
+          type: Number,
+          value: undefined
+        }
+      },
+
+      listeners: {
+        "track": "_onTrack"
+      },
+
+      ready: function() {
+          console.log("This element is draggable.");
+      },
+
+      _coordinatesChanged: function () {
+        var x = this.trackEvent.dx;
+        var y = this.trackEvent.dy;
+        console.log(x, y);
+
+      },
+
+      _onTrack: function (event) {
+        switch (event.detail.state) {
+          case "start":
+                this.x = 0;
+                this.y = 0;
+          break;
+          case "track":
+              this.x += event.detail.ddx;
+              this.y += event.detail.ddy;
+              this.style.transform = 'translate(' + this.x + 'px, ' + this.y + 'px)';
+          break;
+          case "end":
+              this.x = 0;
+              this.y = 0;
+              this.style.transform = 'translate(' + this.x + 'px, ' + this.y + 'px)';
+          break;
+        }
+
+      }
+
+    });
+  </script>
+</dom-module>

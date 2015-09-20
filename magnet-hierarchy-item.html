@@ -3,6 +3,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 Authored by Maxime Perrimond <max.perrimond@gmail.com>
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="magnet-drag-and-drop.html">
 <link rel="stylesheet" type="text/css" href="../components-font-awesome/css/font-awesome.min.css">
 
 <dom-module id="magnet-hierarchy-item">
@@ -74,15 +75,17 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
     </style>
 
     <template>
-        <div id="item">
-            <div class="icon">
-                <i id="group_icon" on-click="_expandClick"></i>
-            </div>
-            <div class="icon">
+        <magnet-drag-and-drop>
+          <div id="item">
+              <div class="icon">
+                  <i id="group_icon" on-click="_expandClick"></i>
+              </div>
+              <div class="icon">
                 <i id="item_icon"></i>
-            </div>
-            <a id="name"></a>
-        </div>
+              </div>
+              <a id="name"></a>
+          </div>
+        </magnet-drag-and-drop>
         <div id="group">
             <content></content>
         </div>
@@ -178,8 +181,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             },
 
-            preventSelection: function(e) {
-                e.preventDefault();
+            preventSelection: function(event) {
+                event.preventDefault();
             },
 
             _onClick: function () {

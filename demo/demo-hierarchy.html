@@ -5,6 +5,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
 <link rel="import" href="../magnet-hierarchy.html">
+<link rel="import" href="../magnet-drag-and-drop.html">
 
 <dom-module id="demo-hierarchy">
 
@@ -49,13 +50,17 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 magnetHierarchy: {
                     type: Object,
                     value: new MagnetHierarchy()
+                },
+
+                magnetDragAndDrop: {
+                  type: Object,
+                  value: new MagnetDragAndDrop()
                 }
             },
 
             behaviors: [Polymer.IronA11yKeysBehavior],
 
             ready: function () {
-                console.log("bite");
                 this.keyEventTarget = document.body;
                 this.addOwnKeyBinding("up", "_up");
                 this.addOwnKeyBinding("down", "_down");
@@ -68,6 +73,10 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 this.magnetHierarchy.addEventListener("submit", function (e) {
                     console.log("Submitted: ", e.detail.item && e.detail.item.name);
                 });
+                var image = new Image(50, 50);
+                //image.src = "https://appharbor.com/assets/images/stackoverflow-logo.png";
+                Polymer.dom(this).appendChild(this.magnetDragAndDrop);
+                this.magnetDragAndDrop.appendChild(image);
             },
 
             _up: function () {
