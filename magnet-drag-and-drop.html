@@ -6,15 +6,9 @@ Authored by Dorian Pinaud <dorian.pinaud@gmail.com>
 <link rel="import" href="../polymer/polymer.html">
 <link rel="stylesheet" type="text/css" href="../components-font-awesome/css/font-awesome.min.css">
 
-<<dom-module id="magnet-drag-and-drop">
+<dom-module id="magnet-drag-and-drop">
   <style>
-    :host {
-      display: flex;
-      position: relative;
-    }
-
     :host(:hover) {
-      opacity: 0.5;
       transition: opacity 420ms ease-in-out;
     }
 
@@ -41,6 +35,11 @@ Authored by Dorian Pinaud <dorian.pinaud@gmail.com>
           y: {
             type: Number,
             value: undefined
+          },
+
+          opacity: {
+            type: Number,
+            value: undefined
           }
       },
 
@@ -48,59 +47,57 @@ Authored by Dorian Pinaud <dorian.pinaud@gmail.com>
           "track": "_onTrack"
       },
 
-      ready: function() {
-          console.log("This element is draggable.");
-      },
-
-      _coordinatesChanged: function () {
-          var x = this.trackEvent.dx;
-          var y = this.trackEvent.dy;
-          console.log(x, y);
-      },
-
-      _checkDragNDropElement: function (node) {
-          if (node.name === "droppable") {
-              return node;
+      _checkDragNDropElement: function (element) {
+          if (element.name === "droppable") {
+              return element;
           }
-          var parentNode = node.parentElement;
-          if (parentNode !== null) {
-              return this._checkDragNDropElement(parentNode);
+          var parentElement = element.parentElement;
+          if (parentElement !== null) {
+              return this._checkDragNDropElement(parentElement);
           }
           return null;
       },
 
       _onTrack: function (event) {
+        event.stopPropagation();
         switch (event.detail.state) {
           case "start":
-              this.x = 0;
-              this.y = 0;
+              this._saveState();
           break;
           case "track":
               this.x += event.detail.ddx;
               this.y += event.detail.ddy;
-              this.style.transform = 'translate(' + this.x + 'px, ' + this.y + 'px)';
+              this.transform('translate(' + this.x + 'px, ' + this.y + 'px)');
+              this.style.opacity = 0.5;
           break;
           case "end":
-              this.x = 0;
-              this.y = 0;
-              this.style.transform = 'translate(' + this.x + 'px, ' + this.y + 'px)';
-              console.log("finish track on", this);
+              this._recoverState();              
               var hover = event.detail.hover();
               hover = this._checkDragNDropElement(hover);
               if (hover === null || hover === this) {
-                  return;
+                return;
               }
               var parentCurrent = this.parentElement;
               if (parentCurrent !== null) {
                   parentCurrent.removeChild(this);
               }
-              var parentHover = hover.parentElement;
-              if (parentHover !== null) {
-                  parentHover.insertBefore(this, hover);
-              }
+              console.log(Polymer.dom(this));
+              hover.parentNode.insertBeforeItem(Polymer.dom(this), hover);
           break;
         }
+      },
 
+      _recoverState: function() {
+          this.style.opacity = this.opacity;
+          this.x = 0;
+          this.y = 0;
+          this.transform('translate(' + this.x + 'px, ' + this.y + 'px)');
+      },
+
+      _saveState: function() {
+          this.x = 0;
+          this.y = 0;
+          this.opacity = this.style.opacity;
       }
 
     });
