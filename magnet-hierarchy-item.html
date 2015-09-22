@@ -157,7 +157,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             listeners: {
                 "down": 'preventSelection',
-                "click": "_onClick"
+                "click": "_onClick",
+                "dropped": "_onDrop"
             },
 
             factoryImpl: function (name, data) {
@@ -190,6 +191,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     name: this.name,
                     data: this.data
                 });
+            },
+
+            _onDrop: function (event) {
+                this.parentNode.removeChild(this);
+                event.detail.on.pushItem(this);
             },
 
             _expandClick: function () {

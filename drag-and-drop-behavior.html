@@ -67,16 +67,11 @@ Authored by Dorian Pinaud <dorian.pinaud@gmail.com>
         case "end":
             this._recoverState();
             var hover = event.detail.hover();
-            console.log(hover);
             hover = this._checkDragNDropElement(hover);
-            console.log(hover);
             if (hover === null || hover === this) {
               return;
             }
-            var parentCurrent = this.parentElement;
-            if (parentCurrent !== null) {
-                parentCurrent.removeChild(this);
-            }
+            this.fire("dropped", {on:hover});
         break;
       }
     },
