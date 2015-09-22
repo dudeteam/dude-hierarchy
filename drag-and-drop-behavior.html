@@ -1,0 +1,102 @@
+<!--
+Copyright (c) 2015 DudeTeam. All rights reserved.
+Authored by Dorian Pinaud <dorian.pinaud@gmail.com>
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="stylesheet" type="text/css" href="../components-font-awesome/css/font-awesome.min.css">
+
+<script>
+    DragAndDropBehavior = {
+        properties: {
+            droppable: {
+                type: Boolean,
+                value: true,
+                readOnly: true
+            },
+
+            x: {
+                type: Number,
+                value: undefined
+            },
+
+            y: {
+                type: Number,
+                value: undefined
+            },
+
+            opacity: {
+                type: Number,
+                value: undefined
+            },
+
+            transition: {
+                type: String,
+                value: undefined
+            }
+        },
+
+    listeners: {
+          "track": "_onTrack"
+    },
+
+    _checkDragNDropElement: function (element) {
+        if (element.droppable) {
+            return element;
+        }
+        var parentElement = element.parentElement;
+        if (parentElement !== null) {
+            return this._checkDragNDropElement(parentElement);
+        }
+        return null;
+    },
+
+    _onTrack: function (event) {
+      event.stopPropagation();
+      switch (event.detail.state) {
+        case "start":
+            this._saveAndInitState();
+        break;
+        case "track":
+            this.x += event.detail.ddx;
+            this.y += event.detail.ddy;
+            this.transform('translate(' + this.x + 'px, ' + this.y + 'px)');
+            this.style.transition = "opacity 250ms ease-in-out";
+            this.style.opacity = 0.5;
+        break;
+        case "end":
+            this._recoverState();
+            var hover = event.detail.hover();
+            console.log(hover);
+            hover = this._checkDragNDropElement(hover);
+            console.log(hover);
+            if (hover === null || hover === this) {
+              return;
+            }
+            var parentCurrent = this.parentElement;
+            if (parentCurrent !== null) {
+                parentCurrent.removeChild(this);
+            }
+        break;
+      }
+    },
+
+    _recoverState: function() {
+        this.style.opacity = this.opacity;
+        this.style.transition = this.transition;
+        this.x = 0;
+        this.y = 0;
+        this.transform('translate(' + this.x + 'px, ' + this.y + 'px)');
+    },
+
+    _saveAndInitState: function() {
+        this.x = 0;
+        this.y = 0;
+        this.opacity = this.style.opacity;
+        this.style.opacity = 0.5;
+        this.transition = this.style.transition;
+        this.style.transition = "opacity 250ms ease-in-out";
+    }
+
+};
+</script>

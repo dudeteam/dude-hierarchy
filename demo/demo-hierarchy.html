@@ -5,7 +5,6 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
 <link rel="import" href="../magnet-hierarchy.html">
-<link rel="import" href="../magnet-drag-and-drop.html">
 
 <dom-module id="demo-hierarchy">
 
@@ -50,11 +49,6 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 magnetHierarchy: {
                     type: Object,
                     value: new MagnetHierarchy()
-                },
-
-                magnetDragAndDrop: {
-                  type: Object,
-                  value: new MagnetDragAndDrop()
                 }
             },
 
@@ -74,9 +68,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     console.log("Submitted: ", e.detail.item && e.detail.item.name);
                 });
                 var image = new Image(50, 50);
-                var dragdrop = new MagnetDragAndDrop();
-                Polymer.dom(this).appendChild(dragdrop);
-                dragdrop.appendChild(image);
+                Polymer.dom(this).appendChild(image);
             },
 
             _up: function () {
