@@ -194,8 +194,15 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _onDrop: function (event) {
-                this.parentNode.removeChild(this);
-                event.detail.on.pushItem(this);
+                event.stopPropagation();
+                if (event.detail.on.group) {
+                  this.parentNode.removeChild(this);
+                  event.detail.on.pushItem(this);
+                }
+                else {
+                  this.parentNode.removeChild(this);
+                  event.detail.on.parentNode.insertBefore(this, event.detail.on);
+                }
             },
 
             _expandClick: function () {

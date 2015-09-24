@@ -183,6 +183,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                         group = true;
                     }
                     var element = new MagnetHierarchyItem(item.name, item.data);
+                    element.dragging = false;
                     if (filtered) {
                         if (item.name.indexOf(this.searchPattern) !== -1) {
                             element.match = true;
