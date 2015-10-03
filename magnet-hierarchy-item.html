@@ -3,7 +3,6 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 Authored by Maxime Perrimond <max.perrimond@gmail.com>
 -->
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="drag-and-drop-behavior.html">
 <link rel="stylesheet" type="text/css" href="../components-font-awesome/css/font-awesome.min.css">
 
 <dom-module id="magnet-hierarchy-item">
@@ -27,6 +26,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             flex-wrap: nowrap;
             justify-content: flex-start;
             align-items: stretch;
+            padding: 3px 0;
         }
 
         :host(.hidden) {
@@ -34,7 +34,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
         }
 
         :host(.active) > #item {
-            background: #222222;
+            background: var(--default-primary-color);
+            color: var(--text-primary-color);
 
             @apply(--magnet-hierarchy-selection)
         }
@@ -68,7 +69,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             padding-left: 5px;
         }
         #name > span {
-            color: #eeeeee;
+            background: var(--default-primary-color);
+            color: var(--text-primary-color);
 
             @apply(--magnet-hierarchy-occurence)
         }
@@ -76,13 +78,13 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
     <template>
         <div id="item">
-              <div class="icon">
-                  <i id="group_icon" on-click="_expandClick"></i>
-              </div>
-              <div class="icon">
+            <div class="icon">
+                <i id="group_icon" on-click="_expandClick"></i>
+            </div>
+            <div class="icon">
                 <i id="item_icon"></i>
-              </div>
-              <a id="name"></a>
+            </div>
+            <a id="name"></a>
         </div>
         <div id="group">
             <content></content>
@@ -92,8 +94,6 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
     <script>
         MagnetHierarchyItem = Polymer({
             is: "magnet-hierarchy-item",
-
-            behaviors: [DragAndDropBehavior],
 
             properties: {
                 name: {
@@ -157,8 +157,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             listeners: {
                 "down": 'preventSelection',
-                "click": "_onClick",
-                "dropped": "_onDrop"
+                "click": "_onClick"
             },
 
             factoryImpl: function (name, data) {
@@ -182,30 +181,21 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             },
 
-            preventSelection: function(event) {
-                event.preventDefault();
+            preventSelection: function(e) {
+                e.preventDefault();
             },
 
-            _onClick: function () {
+            _onClick: function (event) {
+                event.stopPropagation();
                 this.fire("item-click", {
                     name: this.name,
                     data: this.data
                 });
             },
 
-            _onDrop: function (event) {
+            _expandClick: function (event) {
                 event.stopPropagation();
-                if (event.detail.on.group) {
-                  this.parentNode.removeChild(this);
-                  event.detail.on.pushItem(this);
-                }
-                else {
-                  this.parentNode.removeChild(this);
-                  event.detail.on.parentNode.insertBefore(this, event.detail.on);
-                }
-            },
 
-            _expandClick: function () {
                 if (this.group) {
                     this.expand = !this.expand;
                 }
