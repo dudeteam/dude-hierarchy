@@ -3,9 +3,9 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 Authored by Maxime Perrimond <max.perrimond@gmail.com>
 -->
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="magnet-hierarchy-item.html">
+<link rel="import" href="dude-hierarchy-item.html">
 
-<dom-module id="magnet-hierarchy">
+<dom-module id="dude-hierarchy">
 
     <style>
 
@@ -17,11 +17,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             justify-content: flex-start;
             align-items: stretch;
             flex: 1;
-            @apply(--magnet-hierarchy)
+            @apply(--dude-hierarchy)
         }
 
         :host > label {
-            @apply(--magnet-hierarchy-search-label)
+            @apply(--dude-hierarchy-search-label)
         }
 
         #searchInput {
@@ -36,7 +36,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             color: var(--text-color);
             font-family: var(--display-font);
             font-size: 1em;
-            @apply(--magnet-hierarchy-search-input);
+            @apply(--dude-hierarchy-search-input);
         }
         #searchInput:focus {
             border-bottom: 2px solid var(--primary-color);
@@ -52,8 +52,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
     </template>
 
     <script>
-        MagnetHierarchy = Polymer({
-            is: "magnet-hierarchy",
+        DudeHierarchy = Polymer({
+            is: "dude-hierarchy",
 
             properties: {
                 onSelect: {
@@ -103,7 +103,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             select: function (item) {
-                if (!(item instanceof MagnetHierarchyItem)) {
+                if (!(item instanceof DudeHierarchyItem)) {
                     if (typeof item === "string") {
                         if (this.items.every(function (i) {
                             if (i.name === item) {
@@ -182,7 +182,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                         }
                         group = true;
                     }
-                    var element = new MagnetHierarchyItem(item.name, item.data);
+                    var element = new DudeHierarchyItem(item.name, item.data);
                     if (filtered) {
                         if (item.name.indexOf(this.searchPattern) !== -1) {
                             element.match = true;
@@ -262,7 +262,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 }
 
                 var parent = Polymer.dom(this.selectedItem).parentNode;
-                if (parent instanceof MagnetHierarchyItem) {
+                if (parent instanceof DudeHierarchyItem) {
                     this.select(parent);
                 }
             },
@@ -306,7 +306,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 }
 
                 var parent = Polymer.dom(this.selectedItem).parentNode;
-                while (parent instanceof MagnetHierarchyItem) {
+                while (parent instanceof DudeHierarchyItem) {
                     next = Polymer.dom(parent).nextSibling;
                     while (next !== undefined && (next.filtered && !next.match)) {
                         next = Polymer.dom(next).nextSibling;
@@ -331,7 +331,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                         this.selectedItem.expand = false;
                     } else {
                         var parent = Polymer.dom(this.selectedItem).parentNode;
-                        if (parent instanceof MagnetHierarchyItem) {
+                        if (parent instanceof DudeHierarchyItem) {
                             this.select(parent);
                         }
                     }
@@ -376,7 +376,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     if (find !== -1) {
                         item.html = [
                             item.name.slice(0, find),
-                            "<span class=\"magnet-hierarchy-item\">",
+                            "<span class=\"dude-hierarchy-item\">",
                             item.name.slice(find, find + searchPattern.length),
                             "</span>",
                             item.name.slice(find+searchPattern.length)

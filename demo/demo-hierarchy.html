@@ -4,7 +4,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 -->
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
-<link rel="import" href="../magnet-hierarchy.html">
+<link rel="import" href="../dude-hierarchy.html">
 
 <dom-module id="demo-hierarchy">
 
@@ -46,9 +46,9 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     ]
                 },
 
-                magnetHierarchy: {
+                dudeHierarchy: {
                     type: Object,
-                    value: new MagnetHierarchy()
+                    value: new DudeHierarchy()
                 }
             },
 
@@ -63,31 +63,31 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 this.addOwnKeyBinding("left", "_left");
                 this.addOwnKeyBinding("enter", "_submit");
 
-                this.magnetHierarchy.loadItems(this.hierarchy);
-                Polymer.dom(this).appendChild(this.magnetHierarchy);
-                this.magnetHierarchy.addEventListener("submit", function (e) {
+                this.dudeHierarchy.loadItems(this.hierarchy);
+                Polymer.dom(this).appendChild(this.dudeHierarchy);
+                this.dudeHierarchy.addEventListener("submit", function (e) {
                     console.log("Submitted: ", e.detail.item && e.detail.item.name);
                 });
             },
 
             _up: function () {
-                this.magnetHierarchy.goUp();
+                this.dudeHierarchy.goUp();
             },
 
             _down: function () {
-                this.magnetHierarchy.goDown();
+                this.dudeHierarchy.goDown();
             },
 
             _right: function () {
-                this.magnetHierarchy.goRight();
+                this.dudeHierarchy.goRight();
             },
 
             _left: function () {
-                this.magnetHierarchy.goLeft();
+                this.dudeHierarchy.goLeft();
             },
 
             _submit: function () {
-                this.magnetHierarchy.submit();
+                this.dudeHierarchy.submit();
             }
         })
 

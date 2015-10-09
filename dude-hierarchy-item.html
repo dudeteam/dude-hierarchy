@@ -5,7 +5,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 <link rel="import" href="../polymer/polymer.html">
 <link rel="stylesheet" type="text/css" href="../components-font-awesome/css/font-awesome.min.css">
 
-<dom-module id="magnet-hierarchy-item">
+<dom-module id="dude-hierarchy-item">
 
     <style>
 
@@ -17,7 +17,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             justify-content: flex-start;
             align-items: stretch;
             padding: 2px;
-            @apply(--magnet-hierarchy-item)
+            @apply(--dude-hierarchy-item)
         }
 
         #item {
@@ -35,7 +35,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
         :host(.active) > #item {
             background: #222222;
 
-            @apply(--magnet-hierarchy-selection)
+            @apply(--dude-hierarchy-selection)
         }
 
         .icon {
@@ -69,7 +69,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
         #name > span {
             color: #eeeeee;
 
-            @apply(--magnet-hierarchy-occurence)
+            @apply(--dude-hierarchy-occurence)
         }
     </style>
 
@@ -89,8 +89,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
     </template>
 
     <script>
-        MagnetHierarchyItem = Polymer({
-            is: "magnet-hierarchy-item",
+        DudeHierarchyItem = Polymer({
+            is: "dude-hierarchy-item",
 
             properties: {
                 name: {

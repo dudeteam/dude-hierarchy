@@ -1,4 +1,4 @@
-# magnet-hierarchy
+# dude-hierarchy
 Polymer element to create dynamically a hierarchy
 ## Features
 * Load hierarchy from data
