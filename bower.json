@@ -1,18 +1,18 @@
 {
-  "name": "magnet-hierarchy",
+  "name": "dude-hierarchy",
   "version": "0.0.5",
   "authors": [
     "Maxime Perrimond <max.perrimond@gmail.com>"
   ],
   "description": "Polymer element to create dynamically a hierarchy",
   "keywords": [
-    "magnet",
+    "dude",
     "hierarchy",
     "polymer"
   ],
-  "main": "magnet-hierarchy.html",
+  "main": "dude-hierarchy.html",
   "license": "MIT",
-  "homepage": "https://github.com/dudeteam/magnet-hierarchy/",
+  "homepage": "https://github.com/dudeteam/dude-hierarchy/",
   "ignore": [
     "bower_components",
     "/.*"
