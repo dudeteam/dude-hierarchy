@@ -26,6 +26,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             flex-wrap: nowrap;
             justify-content: flex-start;
             align-items: stretch;
+            padding: 3px 0;
         }
 
         :host(.hidden) {
@@ -33,7 +34,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
         }
 
         :host(.active) > #item {
-            background: #222222;
+            background: var(--default-primary-color);
+            color: var(--text-primary-color);
 
             @apply(--dude-hierarchy-selection)
         }
@@ -67,7 +69,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             padding-left: 5px;
         }
         #name > span {
-            color: #eeeeee;
+            background: var(--default-primary-color);
+            color: var(--text-primary-color);
 
             @apply(--dude-hierarchy-occurence)
         }
@@ -182,14 +185,17 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 e.preventDefault();
             },
 
-            _onClick: function () {
+            _onClick: function (event) {
+                event.stopPropagation();
                 this.fire("item-click", {
                     name: this.name,
                     data: this.data
                 });
             },
 
-            _expandClick: function () {
+            _expandClick: function (event) {
+                event.stopPropagation();
+
                 if (this.group) {
                     this.expand = !this.expand;
                 }

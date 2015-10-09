@@ -32,14 +32,14 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             width: 100%;
             box-sizing: border-box;
             background: transparent;
-            border-bottom: 2px solid #555555;
-            color: var(--text-color);
-            font-family: var(--display-font);
+            border-bottom: 1px solid var(--text-secondary-color, #555555);
+            color: var(--text-content-color, #555555);
+            font-family: var(--text-primary-font, sans-serif);
             font-size: 1em;
             @apply(--dude-hierarchy-search-input);
         }
         #searchInput:focus {
-            border-bottom: 2px solid var(--primary-color);
+            border-bottom: 2px solid var(--default-primary-color);
         }
 
     </style>
