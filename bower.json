@@ -1,6 +1,7 @@
 {
   "name": "dude-hierarchy",
   "version": "0.0.5",
+  "description": "Polymer element for dynamic hierarchies",
   "authors": [
     "Maxime Perrimond <max.perrimond@gmail.com>"
   ],
@@ -15,11 +16,14 @@
   "homepage": "https://github.com/dudeteam/dude-hierarchy/",
   "ignore": [
     "bower_components",
-    "/.*"
+    "/.*",
+    "LICENSE",
+    "README.md"
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
-    "components-font-awesome": "~4.3.0"
+    "components-font-awesome": "~4.3.0",
+    "dude-style": "*"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
