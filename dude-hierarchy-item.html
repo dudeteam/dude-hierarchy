@@ -3,7 +3,6 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 Authored by Maxime Perrimond <max.perrimond@gmail.com>
 -->
 <link rel="import" href="../polymer/polymer.html">
-<link rel="stylesheet" type="text/css" href="../components-font-awesome/css/font-awesome.min.css">
 
 <!--
 `dude-hierarchy-item` is a Polymer element which represent an item in the hierarchy
@@ -39,11 +38,9 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             display: none !important;
         }
 
-        :host(.active) > #item {
+        :host(.selected) > #item {
             background: var(--dude-primary-color, #0066bb);
             color: var(--dude-primary-text-color, #9e9e9e);
-
-            @apply(--dude-hierarchy-item-selection)
         }
 
         .icon {
@@ -51,10 +48,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             width: 14px;
             height: 14px;
             padding: 0 2px;
-        }
-
-        #item_icon {
-            color: #555;
+            color: var(--dude-content-text-color, #555555);;
         }
 
         #group {
@@ -67,9 +61,10 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             align-items: stretch;
         }
 
-        :host(:not(.expand)) > #group {
+        :host(:not(.expanded)) > #group {
             display: none;
         }
+
         #name {
             display: inline-block;
             padding-left: 5px;
@@ -79,18 +74,17 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
         #name > span {
             background: var(--dude-primary-color, #0066bb);
             color: var(--dude-primary-text-color, #9e9e9e);
-
-            @apply(--dude-hierarchy-item-occurence)
         }
     </style>
 
+
     <template>
         <div id="item">
-            <div class="icon">
-                <i id="group_icon" on-click="_expandClick"></i>
+            <div class="icon" on-click="_expandTrigger">
+                <i id="expandIcon"></i>
             </div>
             <div class="icon">
-                <i id="item_icon"></i>
+                <i id="icon"></i>
             </div>
             <a id="name"></a>
         </div>
@@ -104,9 +98,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             is: "dude-hierarchy-item",
 
             properties: {
-                name: {
-                    type: String,
-                    observer: "_nameChanged"
+                item: {
+                    type: Object,
+                    value: null,
+                    reflectToAttribute: true,
+                    observer: "_itemChanged"
                 },
 
                 html: {
@@ -114,13 +110,46 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     observer: "_htmlChanged"
                 },
 
-                /**
-                 * Whether the item matches the searchPattern of the hierarchy.
-                 * @type {Boolean}
-                 */
+                icon: {
+                    type: String,
+                    value: "",
+                    observer: "_iconChanged"
+                },
+
+                _defaultItemIcon: {
+                    type: String,
+                    value: "fa fa-file-o",
+                    readOnly: true
+                },
+
+                _defaultGroupIcon: {
+                    type: String,
+                    value: "fa fa-folder-o",
+                    readOnly: true
+                },
+
+                expandIcon: {
+                    type: String,
+                    value: "",
+                    observer: "_expandIconChanged"
+                },
+
+                _defaultIconExpand: {
+                    type: String,
+                    value: "fa fa-caret-down",
+                    readOnly: true
+                },
+
+                _defaultIconMinimize: {
+                    type: String,
+                    value: "fa fa-caret-right",
+                    readOnly: true
+                },
+
                 match: {
                     type: Boolean,
-                    value: false
+                    value: false,
+                    observer: "_filteredChanged"
                 },
 
                 filtered: {
@@ -129,139 +158,143 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     observer: "_filteredChanged"
                 },
 
-                icon: {
-                    type: String,
-                    value: "fa fa-file-o",
-                    observer: "_iconChanged"
-                },
-
-                groupIcon: {
-                    type: String,
-                    value: "fa fa-caret-right"
-                },
-
-                groupIconExpand: {
-                    type: String,
-                    value: "fa fa-caret-down"
-                },
-
-                data: {
-                    type: Object,
-                    value: null
-                },
-
-                group: {
+                _group: {
                     type: Boolean,
-                    value: false,
-                    observer: "_groupChanged"
+                    value: false
                 },
 
-                expand: {
+                _expanded: {
                     type: Boolean,
-                    value: false,
-                    observer: "_expandChanged"
+                    value: false
                 }
             },
 
             listeners: {
-                "down": 'preventSelection',
-                "click": "_onClick"
+                "down": '_preventSelection',
+                "click": "_onClick",
+                "dblclick": "_onDblClick"
             },
 
-            factoryImpl: function (name, data) {
-                this.name = name;
-                this.data = data;
+            factoryImpl: function (item, isGroup) {
+                this._group = (isGroup !== undefined && isGroup);
+                this.item = item;
+                this.minimize();
             },
 
-            pushItem: function (item) {
-                Polymer.dom(this).appendChild(item);
+            _preventSelection: function (event) {
+                event.preventDefault();
             },
 
-            insertBeforeItem: function (item, before) {
-
-            },
-
-            removeItem: function (item) {
-
-            },
-
-            moveItem: function (item, before, after) {
-
-            },
-
-            preventSelection: function(e) {
-                e.preventDefault();
-            },
-
-            _onClick: function (event) {
-                event.stopPropagation();
-                this.fire("item-click", {
-                    name: this.name,
-                    data: this.data
-                });
-            },
-
-            _expandClick: function (event) {
-                event.stopPropagation();
-
-                if (this.group) {
-                    this.expand = !this.expand;
+            _itemChanged: function () {
+                if (this.item !== null && typeof this.item === "object") {
+                    this.resetHtml();
+                    if (this.item.icon !== undefined) {
+                        this.icon = this.item.icon;
+                    } else {
+                        this.icon = (this.isGroup()) ? this._defaultGroupIcon : this._defaultItemIcon;
+                    }
+                    this.match = false;
+                    this.filtered = false;
                 }
-            },
-
-            _nameChanged: function () {
-                this.html = this.name;
             },
 
             _htmlChanged: function () {
                 this.$.name.innerHTML = this.html;
             },
 
+            _onClick: function (event) {
+                event.stopPropagation();
+                this.fire("dude-hierarchy-item-click");
+            },
+
+            _onDblClick: function (event) {
+                event.stopPropagation();
+                this.fire("dude-hierarchy-item-dblclick");
+            },
+
+            _expandTrigger: function (event) {
+                event.stopPropagation();
+                if (this._expanded) {
+                    this.minimize();
+                } else {
+                    this.expand();
+                }
+            },
+
             _filteredChanged: function () {
-                if (this.filtered && !this.match) {
-                    this.classList.add("hidden");
-                } else {
-                    this.classList.remove("hidden");
+                var hidden = false;
+                if (this.filtered) {
+                    hidden = this.filtered && !this.match;
+                }
+                this.toggleClass("hidden", hidden);
+            },
+
+            _iconChanged: function (newIcon, oldIcon) {
+                this._toggleIcon(oldIcon, false, this.$.icon);
+                this._toggleIcon(newIcon, true, this.$.icon);
+            },
+
+            _expandIconChanged: function (newIcon, oldIcon) {
+                this._toggleIcon(oldIcon, false, this.$.expandIcon);
+                this._toggleIcon(newIcon, true, this.$.expandIcon);
+            },
+
+            _toggleIcon: function (icon, toggle, on) {
+                if (icon !== undefined) {
+                    icon.split(" ").forEach(function (value) {
+                        if (value) {
+                            this.toggleClass(value, toggle, on);
+                        }
+                    }.bind(this))
                 }
             },
 
-            _iconChanged: function () {
-                this.$.item_icon.classList = "";
-                this._addClassesTo(this.icon, this.$.item_icon.classList);
-            },
-
-            _groupChanged: function () {
-                if (this.group) {
-                    this._addClassesTo(this.groupIcon, this.$.group_icon.classList);
-                } else {
-                    this._removeClassesTo(this.groupIcon, this.$.group_icon.classList);
+            expand: function () {
+                if (this.isGroup()) {
+                    this._expanded = true;
+                    this.expandIcon = this._defaultIconExpand;
+                    this.toggleClass("expanded", true);
                 }
             },
 
-            _expandChanged: function () {
-                if (this.group) {
-                    if (this.expand) {
-                        this.classList.add("expand");
-                        this._removeClassesTo(this.groupIcon, this.$.group_icon.classList);
-                        this._addClassesTo(this.groupIconExpand, this.$.group_icon.classList);
-                    } else {
-                        this.classList.remove("expand");
-                        this._removeClassesTo(this.groupIconExpand, this.$.group_icon.classList);
-                        this._addClassesTo(this.groupIcon, this.$.group_icon.classList);
-                    }
+            minimize: function () {
+                if (this.isGroup()) {
+                    this._expanded = false;
+                    this.expandIcon = this._defaultIconMinimize;
+                    this.toggleClass("expanded", false);
                 }
             },
 
-            _addClassesTo: function (classes, to) {
-                classes.split(" ").forEach(function (c) {
-                    to.add(c);
+            select: function () {
+                this.toggleClass("selected", true, this);
+                this.fire("dude-hierarchy-item-select", {
+                    item: this.item
                 });
             },
 
-            _removeClassesTo: function (classes, to) {
-                classes.split(" ").forEach(function (c) {
-                    to.remove(c);
+            deselect: function () {
+                this.toggleClass("selected", false, this);
+                this.fire("dude-hierarchy-item-deselect", {
+                    item: this.item
                 });
+            },
+
+            submit: function () {
+                this.fire("dude-hierarchy-item-submit", {
+                    item: this.item
+                });
+            },
+
+            resetHtml: function () {
+                this.html = (this.item.name !== undefined) ? this.item.name : "";
+            },
+
+            isGroup: function () {
+                return this._group;
+            },
+
+            isExpanded: function () {
+                return this._expanded;
             }
         });
     </script>

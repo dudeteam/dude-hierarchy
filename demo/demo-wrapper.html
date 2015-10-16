@@ -61,29 +61,34 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 this.addOwnKeyBinding("left", "_left");
                 this.addOwnKeyBinding("enter", "_submit");
 
-                this.dudeHierarchy.loadItems(this.hierarchy);
                 Polymer.dom(this).appendChild(this.dudeHierarchy);
-                this.dudeHierarchy.addEventListener("submit", function (e) {
+
+                this.dudeHierarchy.items = this.hierarchy;
+                this.dudeHierarchy.addEventListener("dude-hierarchy-item-submit", function (e) {
                     console.log("Submitted: ", e.detail.item && e.detail.item.name);
                 });
-                var image = new Image(50, 50);
-                Polymer.dom(this).appendChild(image);
+                this.dudeHierarchy.addEventListener("dude-hierarchy-item-select", function (e) {
+                    console.log("Selected: ", e.detail.item && e.detail.item.name);
+                });
+                this.dudeHierarchy.addEventListener("dude-hierarchy-item-deselect", function (e) {
+                    console.log("Deselected: ", e.detail.item && e.detail.item.name);
+                });
             },
 
             _up: function () {
-                this.dudeHierarchy.goUp();
+                this.dudeHierarchy.moveUp();
             },
 
             _down: function () {
-                this.dudeHierarchy.goDown();
+                this.dudeHierarchy.moveDown();
             },
 
             _right: function () {
-                this.dudeHierarchy.goRight();
+                this.dudeHierarchy.moveRight();
             },
 
             _left: function () {
-                this.dudeHierarchy.goLeft();
+                this.dudeHierarchy.moveLeft();
             },
 
             _submit: function () {

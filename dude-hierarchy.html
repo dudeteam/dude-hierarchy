@@ -54,7 +54,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
     <template>
         <label>
-            <input id="searchInput" type="text" value="{{searchPattern::input}}">
+            <input id="searchInput" type="text" value="{{_argument::input}}">
         </label>
         <content></content>
     </template>
@@ -64,225 +64,134 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             is: "dude-hierarchy",
 
             properties: {
-                onSelect: {
-                    type: Object
+
+                items: {
+                    type: Array,
+                    value: [],
+                    reflectToAttribute: true,
+                    notify: true,
+                    observer: "_itemsChanged"
                 },
 
-                selectedItem: {
-                    type: Object,
-                    value: null
+                autoSelect: {
+                    type: Boolean,
+                    value: true,
+                    reflectToAttribute: true
                 },
 
-                /**
-                 * @type {String}
-                 */
-                searchPattern: {
+                _argument: {
                     type: String,
                     observer: "_search"
                 },
 
-                items: {
-                    type: Array
+                _selectedItem: {
+                    type: Object,
+                    value: null
                 }
             },
 
             listeners: {
-                "item-click": "_itemClick"
+                "dude-hierarchy-item-click": "_onItemClick",
+                "dude-hierarchy-item-dblclick": "_onItemDblClick"
             },
 
-            goUp: function () {
-                this._moveUpSelection();
-            },
-
-            goDown: function () {
-                this._moveDownSelection();
-            },
-
-            goRight: function () {
-                this._expandSelection();
-            },
-
-            goLeft: function () {
-                this._minimiseSelection();
-            },
-
-            submit: function () {
-                this._submitSelection();
-            },
-
-            select: function (item) {
-                if (!(item instanceof DudeHierarchyItem)) {
-                    if (typeof item === "string") {
-                        if (this.items.every(function (i) {
-                            if (i.name === item) {
-                                item = i;
-                                return false;
-                            }
-                            return true;
-                        })) {
-                            item = null;
-                        }
-                    }
-                }
-
-                if (item !== null) {
-                    if (item !== this.selectedItem) {
-                        if (this.selectedItem !== null) {
-                            this.selectedItem.classList.remove("active");
-                        }
-                        this.selectedItem = item;
-                        this.selectedItem.classList.add("active");
-                    }
-                }
-            },
-
-            /**
-             * Load the hierarchy on items given.
-             * Format:
-             *  [
-             *      {item: {
-             *          name: "name",
-             *          icon: "icon", (Optional)
-             *          data: ...
-             *      }},
-             *      {group: {
-             *          name: "name",
-             *          icon: "icon", (Optional)
-             *          data: ...,
-             *          items: [
-             *              {item: { ... }},
-             *              {item: { ... }},
-             *              {group: { ... }}
-             *          ]
-             *      }}
-             *  ]
-             *
-             * @param items
-             */
-            loadItems: function (items) {
-                this.items = items;
+            _itemsChanged: function (newItems, oldItems) {
+                // TODO: Partial load only on changes
                 this._clear();
-                var elements = this._load(this.items);
+                var elements = this._loadRecurse(this.items);
+                if (this.autoSelect) {
+                    this._selectItem(elements[0]);
+                }
                 this._appendItems(this, elements);
                 Polymer.dom.flush();
             },
 
-            _load: function (items, filtered) {
-                this._foundOne = false;
-                var elements = this._loadRecurse(items, filtered).elements;
-                if (!this._foundOne) {
-                    this.select(elements[0]);
-                }
-                return elements;
-            },
-
-            _loadRecurse: function (items, filtered) {
-                filtered = filtered === undefined ? false : filtered;
+            _loadRecurse: function (items) {
                 var elements = [];
-                var foundInGroup = false;
                 for (var i = 0; i < items.length; i++) {
                     var item = items[i].item;
-                    var group = false;
+                    var isGroup = false;
                     if (item === undefined) {
                         item = items[i].group;
                         if (item === undefined) {
                             continue;
                         }
-                        group = true;
+                        isGroup = true;
                     }
-                    var element = new DudeHierarchyItem(item.name, item.data);
-                    if (filtered) {
-                        if (item.name.indexOf(this.searchPattern) !== -1) {
-                            element.match = true;
-                            if (!this._foundOne) {
-                                this.select(element);
-                                this._foundOne = true;
-                            }
-                            foundInGroup = true;
-                        }
-                    }
-                    if (item.html !== undefined) {
-                        element.html = item.html;
-                    }
-                    if (item.icon !== undefined) {
-                        element.icon = item.icon;
-                    }
-                    if (group) {
-                        element.group = true;
+                    var element = new DudeHierarchyItem(item, isGroup);
+                    if (isGroup) {
                         if (item.expand !== undefined) {
-                            element.expand = item.expand;
+                            element.expand();
                         }
                         if (item.items == undefined) {
                             item.items = [];
                         }
-                        var result = this._loadRecurse(item.items, filtered);
-                        this._appendItems(element, result.elements);
-                        if (filtered) {
-                            element.match = item.name.indexOf(this.searchPattern) !== -1 || result.foundInGroup;
-                        }
+                        this._appendItems(element, this._loadRecurse(item.items));
                     }
-                    element.filtered = filtered;
                     elements.push(element);
                 }
-                return {
-                    elements: elements,
-                    foundInGroup: foundInGroup
-                };
+                return elements;
             },
 
             _appendItems: function (parent, items) {
                 for (var i = 0; i < items.length; i++) {
-                    parent.pushItem(items[i]);
+                    Polymer.dom(parent).appendChild(items[i]);
                 }
             },
 
-            pushItem: function (item) {
-                Polymer.dom(this).appendChild(item);
+            _selectFirstItem: function () {
+                var item = Polymer.dom(this).firstElementChild;
+                while (item && (!item.filtered || !(item.filtered && item.match))) {
+                    item = Polymer.dom(item).nextSibling;
+                }
+                this._selectItem(item);
             },
 
-            insertBeforeItem: function (item, before) {
-
+            _selectItem: function (item) {
+                if (item && item instanceof DudeHierarchyItem) {
+                    if (item !== this._selectedItem) {
+                        if (this._selectedItem !== null) {
+                            this._selectedItem.deselect();
+                        }
+                        this._selectedItem = item;
+                        this._selectedItem.select();
+                    }
+                }
             },
 
-            removeItem: function (item) {
-
-            },
-
-            moveItem: function (item, before, after) {
-
-            },
-
-            _moveUpSelection: function () {
-                var previous = Polymer.dom(this.selectedItem).previousSibling;
+            moveUp: function () {
+                if (this._selectedItem === null) {
+                    this._selectFirstItem();
+                }
+                var previous = Polymer.dom(this._selectedItem).previousSibling;
                 while (previous !== undefined && (previous.filtered && !previous.match)) {
                     previous = Polymer.dom(previous).previousSibling;
                 }
                 if (previous !== undefined) {
-                    if (previous.group && previous.expand) {
-                        var last = this._selectLast(previous);
+                    if (previous.isGroup() && previous.isExpanded()) {
+                        var last = this._getLastFrom(previous);
                         if (last !== undefined) {
-                            this.select(last);
+                            this._selectItem(last);
                             return;
                         }
                     }
-                    this.select(previous);
+                    this._selectItem(previous);
                     return;
                 }
-
-                var parent = Polymer.dom(this.selectedItem).parentNode;
+                var parent = Polymer.dom(this._selectedItem).parentNode;
                 if (parent instanceof DudeHierarchyItem) {
-                    this.select(parent);
+                    this._selectItem(parent);
                 }
             },
 
-            _selectLast: function (item) {
+            _getLastFrom: function (item) {
                 var last = item;
-                if (item.group && item.expand && Polymer.dom(item).lastElementChild !== undefined) {
+                if (item.isGroup() && item.isExpanded() && Polymer.dom(item).lastElementChild !== undefined) {
                     last = Polymer.dom(item).lastChild;
                     while (last !== undefined && (last.filtered && !last.match)) {
                         last = Polymer.dom(last).previousSibling;
                     }
-                    var lol = this._selectLast(last);
+                    var lol = this._getLastFrom(last);
                     if (lol !== undefined) {
                         last = lol;
                     }
@@ -290,108 +199,137 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 return last;
             },
 
-            _moveDownSelection: function () {
-                if (this.selectedItem.group && this.selectedItem.expand) {
-                    var first = Polymer.dom(this.selectedItem).firstChild;
+            moveDown: function () {
+                if (this._selectedItem === null) {
+                    this._selectFirstItem();
+                }
+                if (this._selectedItem.isGroup() && this._selectedItem.isExpanded()) {
+                    var first = Polymer.dom(this._selectedItem).firstChild;
                     if (first !== undefined) {
                         while (first !== undefined && (first.filtered && !first.match)) {
                             first = Polymer.dom(first).nextSibling;
                         }
                         if (first !== undefined) {
-                            this.select(first);
+                            this._selectItem(first);
                             return;
                         }
                     }
                 }
-
-                var next = Polymer.dom(this.selectedItem).nextSibling;
+                var next = Polymer.dom(this._selectedItem).nextSibling;
                 while (next !== undefined && (next.filtered && !next.match)) {
                     next = Polymer.dom(next).nextSibling;
                 }
                 if (next !== undefined) {
-                    this.select(next);
+                    this._selectItem(next);
                     return;
                 }
-
-                var parent = Polymer.dom(this.selectedItem).parentNode;
+                var parent = Polymer.dom(this._selectedItem).parentNode;
                 while (parent instanceof DudeHierarchyItem) {
                     next = Polymer.dom(parent).nextSibling;
                     while (next !== undefined && (next.filtered && !next.match)) {
                         next = Polymer.dom(next).nextSibling;
                     }
                     if (next !== undefined) {
-                        this.select(next);
+                        this._selectItem(next);
                         return;
                     }
                     parent = Polymer.dom(parent).parentNode;
                 }
             },
 
-            _expandSelection: function () {
-                if (this.selectedItem !== null && this.selectedItem.group) {
-                    this.selectedItem.expand = true;
+            moveRight: function () {
+                if (this._selectedItem === null) {
+                    this._selectFirstItem();
                 }
-            },
-
-            _minimiseSelection: function () {
-                if (this.selectedItem !== null) {
-                    if (this.selectedItem.group && this.selectedItem.expand) {
-                        this.selectedItem.expand = false;
+                if (this._selectedItem.isGroup()) {
+                    if (this._selectedItem.isExpanded() === false) {
+                        this._selectedItem.expand();
                     } else {
-                        var parent = Polymer.dom(this.selectedItem).parentNode;
-                        if (parent instanceof DudeHierarchyItem) {
-                            this.select(parent);
-                        }
+                        this.moveDown();
                     }
                 }
             },
 
-            _submitSelection: function () {
-                this.fire("submit", {
-                    item: this.selectedItem
-                });
+            moveLeft: function () {
+                if (this._selectedItem === null) {
+                    this._selectFirstItem();
+                }
+                if (this._selectedItem.isGroup() && this._selectedItem.isExpanded()) {
+                    this._selectedItem.minimize();
+                } else {
+                    var parent = Polymer.dom(this._selectedItem).parentNode;
+                    if (parent instanceof DudeHierarchyItem) {
+                        this._selectItem(parent);
+                    }
+                }
             },
 
-            _itemClick: function (event) {
-                this.select(event.target);
-                if (this.onSelect !== undefined) {
-                    this.onSelect(event.detail);
+            submit: function () {
+                if (this._selectedItem !== null) {
+                    this._selectedItem.submit();
                 }
+            },
+
+            _onItemClick: function (event) {
+                event.stopPropagation();
+                this._selectItem(event.target);
+            },
+
+            _onItemDblClick: function (event) {
+                event.stopPropagation();
+                this.submit();
             },
 
             _search: function () {
-                this._clear();
-                this._appendItems(this, this._load(this._filter(this.searchPattern), this.searchPattern.length > 0));
-                Polymer.dom.flush();
+                this._filterItems(this._argument, Polymer.dom(this).childNodes);
+                if (this._selectedItem === null) {
+                    this._selectFirstItem();
+                }
             },
 
-            _filter: function (searchPattern) {
-                return this._filterItems(searchPattern, this.items);
-            },
-
-            _filterItems: function (searchPattern, items) {
-                for (var i = 0; i < items.length; i++) {
-                    var item;
-                    if (items[i].group) {
-                        items[i].group.expand = true;
-                        item = items[i].group;
-                        this._filterItems(searchPattern, item.items);
-                    } else {
-                        item = items[i].item;
-                    }
-
-                    var find = item.name.indexOf(searchPattern);
-                    if (find !== -1) {
-                        item.html = [
-                            item.name.slice(0, find),
-                            "<span class=\"dude-hierarchy-item\">",
-                            item.name.slice(find, find + searchPattern.length),
-                            "</span>",
-                            item.name.slice(find+searchPattern.length)
-                        ].join("");
+            _filterItems: function (searchPattern, elements) {
+                var found = false;
+                if (elements instanceof Array) {
+                    for (var i = 0; i < elements.length; i++) {
+                        var element = elements[i];
+                        if (element instanceof DudeHierarchyItem) {
+                            if (searchPattern === "") {
+                                element.resetHtml();
+                                element.filtered = false;
+                                element.match = false;
+                            } else {
+                                element.filtered = true;
+                                var find = element.item.name.indexOf(searchPattern);
+                                if (find !== -1) {
+                                    element.html = [
+                                        element.item.name.slice(0, find),
+                                        "<span class=\"dude-hierarchy-item\">",
+                                        element.item.name.slice(find, find + searchPattern.length),
+                                        "</span>",
+                                        element.item.name.slice(find + searchPattern.length)
+                                    ].join("");
+                                    element.match = true;
+                                    found = true;
+                                } else {
+                                    element.match = false;
+                                    element.resetHtml();
+                                    if (this._selectedItem === element) {
+                                        this._selectedItem.deselect();
+                                        this._selectedItem = null;
+                                    }
+                                }
+                            }
+                            if (element.isGroup()) {
+                                if (this._filterItems(searchPattern, Polymer.dom(element).childNodes)) {
+                                    element.expand();
+                                    element.match = true;
+                                    found = true;
+                                }
+                            }
+                        }
                     }
                 }
-                return items;
+                return found;
             },
 
             _clear: function () {
