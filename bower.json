@@ -3,7 +3,10 @@
   "version": "0.0.5",
   "description": "Polymer element to create dynamically a hierarchy",
   "authors": [
-    "Maxime Perrimond <max.perrimond@gmail.com>"
+    "Maxime Perrimond <max.perrimond@gmail.com>",
+    "Jeremie Taboada <taboada.jeremie@gmail.com>",
+    "Dorian Pinaud <dorian.pinaud@gmail.com>",
+    "Jonathan Picques <jonathan.picques@gmail.com>"
   ],
   "keywords": [
     "dude",
