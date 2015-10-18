@@ -1,7 +1,9 @@
 <!--
 Copyright (c) 2015 DudeTeam. All rights reserved.
+Authored by Maxime Perrimond <max.perrimond@gmail.com>
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../dude-style/dude-style.html">
 <link rel="import" href="dude-hierarchy-item.html">
 
 <!--
@@ -48,13 +50,19 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             border-bottom: 2px solid var(--dude-primary-color, #9e9e9e);
         }
 
+        #content {
+            overflow: auto;
+        }
+
     </style>
 
     <template>
         <label>
             <input id="searchInput" type="text" value="{{_argument::input}}">
         </label>
-        <content></content>
+        <div id="content">
+            <content></content>
+        </div>
     </template>
 
     <script>
@@ -91,6 +99,11 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             listeners: {
                 "dude-hierarchy-item-click": "_onItemClick",
                 "dude-hierarchy-item-dblclick": "_onItemDblClick"
+            },
+
+            focus: function () {
+                this.$.searchInput.blur();
+                this.$.searchInput.focus();
             },
 
             _itemsChanged: function (newItems, oldItems) {
