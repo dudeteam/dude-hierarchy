@@ -1,6 +1,6 @@
 {
   "name": "dude-hierarchy",
-  "version": "0.0.6",
+  "version": "0.0.9",
   "description": "Polymer element to create dynamically a hierarchy",
   "authors": [
     "Maxime Perrimond <max.perrimond@gmail.com>",
