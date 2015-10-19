@@ -58,7 +58,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
     <template>
         <label>
-            <input id="searchInput" type="text" value="{{_argument::input}}">
+            <input id="searchInput" type="text" placeholder="[[ placeholder ]]" value="{{_argument::input}}">
         </label>
         <div id="content">
             <content></content>
@@ -83,6 +83,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     type: Boolean,
                     value: true,
                     reflectToAttribute: true
+                },
+
+                placeholder: {
+                    type: String,
+                    value: ""
                 },
 
                 _argument: {
