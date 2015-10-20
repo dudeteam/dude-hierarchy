@@ -25,7 +25,8 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
     "font-awesome": "fontawesome#~4.4.0",
-    "dude-style": "*"
+    "dude-style": "*",
+    "dude-popup": "*"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
