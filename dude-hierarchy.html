@@ -65,7 +65,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
     <template>
         <div class="layout horizontal">
             <input class="flex" id="searchInput" type="text" placeholder="[[ placeholder ]]" value="{{_argument::input}}">
-            <a id="menu" hidden$="[[ !editable ]]"><i class="fa fa-plus-circle"></i></a>
+            <a id="menu" hidden$="[[ !editable ]]" on-click="_menuClicked"><i class="fa fa-plus-circle"></i></a>
         </div>
         <div id="content">
             <content></content>
@@ -121,6 +121,15 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             focus: function () {
                 this.$.searchInput.blur();
                 this.$.searchInput.focus();
+            },
+
+            addItem: function (item) {
+                this.push("items", item);
+                this._itemsChanged();
+            },
+
+            _menuClicked: function () {
+                this.fire("dude-hierarchy-add-item");
             },
 
             _itemsChanged: function (newItems, oldItems) {

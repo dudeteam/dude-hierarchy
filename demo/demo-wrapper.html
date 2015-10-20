@@ -22,7 +22,11 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                 <dude-hierarchy id="hierarchyItems" items="{{ items }}"></dude-hierarchy>
             </div>
             <div class="panel flex">
-                <dude-hierarchy id="hierarchyResources" items="{{ resources }}" editable></dude-hierarchy>
+                <dude-hierarchy id="hierarchyResources"
+                                items="{{ resources }}"
+                                editable
+                                on-dude-hierarchy-add-item="_addResource">
+                </dude-hierarchy>
             </div>
         </div>
     </template>
@@ -87,6 +91,10 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                 this.$.hierarchyItems.addEventListener("dude-hierarchy-item-deselect", function (e) {
                     console.log("Deselected: ", e.detail.item && e.detail.item.name);
                 });
+            },
+
+            _addResource: function () {
+                this.$.hierarchyResources.addItem({"item": {"name": "lol.png"}});
             },
 
             _up: function () {
