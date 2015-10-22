@@ -53,7 +53,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             overflow: auto;
         }
 
-        #menu {
+        #addItem {
             padding: 8px 0 0 8px;
             color: var(--dude-secondary-text-color);
             cursor: pointer;
@@ -63,8 +63,9 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
     <template>
         <div class="layout horizontal">
-            <input class="flex" id="searchInput" type="text" placeholder="[[ placeholder ]]" value="{{_argument::input}}">
-            <a id="menu" hidden$="[[ !editable ]]" on-click="_menuClicked"><i class="fa fa-plus-circle"></i></a>
+            <input class="flex" id="searchInput" type="text" placeholder="[[ placeholder ]]"
+                   value="{{_argument::input}}">
+            <a id="addItem" hidden$="[[ !editable ]]" on-click="_addItem"><i class="fa fa-plus-circle"></i></a>
         </div>
         <div id="content">
             <content></content>
@@ -80,15 +81,13 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 items: {
                     type: Array,
                     value: [],
-                    reflectToAttribute: true,
                     notify: true,
                     observer: "_itemsChanged"
                 },
 
                 autoSelect: {
                     type: Boolean,
-                    value: true,
-                    reflectToAttribute: true
+                    value: true
                 },
 
                 placeholder: {
@@ -117,82 +116,19 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 "dude-hierarchy-item-dblclick": "_onItemDblClick"
             },
 
+            observers: [
+                '_itemsChanged(items.splices)'
+            ],
+
+            submit: function () {
+                if (this._selectedItem !== null) {
+                    this._selectedItem.submit();
+                }
+            },
+
             focus: function () {
                 this.$.searchInput.blur();
                 this.$.searchInput.focus();
-            },
-
-            addItem: function (item) {
-                this.push("items", item);
-                this._itemsChanged();
-            },
-
-            _menuClicked: function () {
-                this.fire("dude-hierarchy-add-item");
-            },
-
-            _itemsChanged: function (newItems, oldItems) {
-                // TODO: Partial load only on changes
-                this._clear();
-                var elements = this._loadRecurse(this.items);
-                if (this.autoSelect) {
-                    this._selectItem(elements[0]);
-                }
-                this._appendItems(this, elements);
-                Polymer.dom.flush();
-            },
-
-            _loadRecurse: function (items) {
-                var elements = [];
-                for (var i = 0; i < items.length; i++) {
-                    var item = items[i].item;
-                    var isGroup = false;
-                    if (item === undefined) {
-                        item = items[i].group;
-                        if (item === undefined) {
-                            continue;
-                        }
-                        isGroup = true;
-                    }
-                    var element = new DudeHierarchyItem(item, isGroup);
-                    if (isGroup) {
-                        if (item.expand !== undefined) {
-                            element.expand();
-                        }
-                        if (item.items == undefined) {
-                            item.items = [];
-                        }
-                        this._appendItems(element, this._loadRecurse(item.items));
-                    }
-                    elements.push(element);
-                }
-                return elements;
-            },
-
-            _appendItems: function (parent, items) {
-                for (var i = 0; i < items.length; i++) {
-                    Polymer.dom(parent).appendChild(items[i]);
-                }
-            },
-
-            _selectFirstItem: function () {
-                var item = Polymer.dom(this).firstElementChild;
-                while (item && (!item.filtered || !(item.filtered && item.match))) {
-                    item = Polymer.dom(item).nextSibling;
-                }
-                this._selectItem(item);
-            },
-
-            _selectItem: function (item) {
-                if (item && item instanceof DudeHierarchyItem) {
-                    if (item !== this._selectedItem) {
-                        if (this._selectedItem !== null) {
-                            this._selectedItem.deselect();
-                        }
-                        this._selectedItem = item;
-                        this._selectedItem.select();
-                    }
-                }
             },
 
             moveUp: function () {
@@ -218,21 +154,6 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 if (parent instanceof DudeHierarchyItem) {
                     this._selectItem(parent);
                 }
-            },
-
-            _getLastFrom: function (item) {
-                var last = item;
-                if (item.isGroup() && item.isExpanded() && Polymer.dom(item).lastElementChild !== undefined) {
-                    last = Polymer.dom(item).lastChild;
-                    while (last !== undefined && (last.filtered && !last.match)) {
-                        last = Polymer.dom(last).previousSibling;
-                    }
-                    var lol = this._getLastFrom(last);
-                    if (lol !== undefined) {
-                        last = lol;
-                    }
-                }
-                return last;
             },
 
             moveDown: function () {
@@ -300,9 +221,100 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 }
             },
 
-            submit: function () {
-                if (this._selectedItem !== null) {
-                    this._selectedItem.submit();
+            _getLastFrom: function (item) {
+                var last = item;
+                if (item.isGroup() && item.isExpanded() && Polymer.dom(item).lastElementChild !== undefined) {
+                    last = Polymer.dom(item).lastChild;
+                    while (last !== undefined && (last.filtered && !last.match)) {
+                        last = Polymer.dom(last).previousSibling;
+                    }
+                    var lol = this._getLastFrom(last);
+                    if (lol !== undefined) {
+                        last = lol;
+                    }
+                }
+                return last;
+            },
+
+            _addItem: function () {
+                this.fire("dude-hierarchy-add-item");
+            },
+
+            /**
+             * Called when the items array is modified (new items pushed, removed, ...)
+             * @param changeRecord
+             */
+            _itemsModified: function (changeRecord) {
+                // TODO: Partial load changes
+                // TODO: An item has been pushed, removed, ...
+                // https://www.polymer-project.org/1.0/docs/devguide/properties.html#array-observation
+                this._itemsChanged();
+            },
+
+            /**
+             * Called when the entire items array is replaced
+             * @private
+             */
+            _itemsChanged: function () {
+                this._clear();
+                var elements = this._loadRecurse(this.items);
+                if (this.autoSelect) {
+                    this._selectItem(elements[0]);
+                }
+                this._appendItems(this, elements);
+                Polymer.dom.flush();
+            },
+
+            _loadRecurse: function (items) {
+                var elements = [];
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i].item;
+                    var isGroup = false;
+                    if (item === undefined) {
+                        item = items[i].group;
+                        if (item === undefined) {
+                            continue;
+                        }
+                        isGroup = true;
+                    }
+                    var element = new DudeHierarchyItem(item, isGroup);
+                    if (isGroup) {
+                        if (item.expand !== undefined) {
+                            element.expand();
+                        }
+                        if (item.items == undefined) {
+                            item.items = [];
+                        }
+                        this._appendItems(element, this._loadRecurse(item.items));
+                    }
+                    elements.push(element);
+                }
+                return elements;
+            },
+
+            _appendItems: function (parent, items) {
+                for (var i = 0; i < items.length; i++) {
+                    Polymer.dom(parent).appendChild(items[i]);
+                }
+            },
+
+            _selectFirstItem: function () {
+                var item = Polymer.dom(this).firstElementChild;
+                while (item && (!item.filtered || !(item.filtered && item.match))) {
+                    item = Polymer.dom(item).nextSibling;
+                }
+                this._selectItem(item);
+            },
+
+            _selectItem: function (item) {
+                if (item && item instanceof DudeHierarchyItem) {
+                    if (item !== this._selectedItem) {
+                        if (this._selectedItem !== null) {
+                            this._selectedItem.deselect();
+                        }
+                        this._selectedItem = item;
+                        this._selectedItem.select();
+                    }
                 }
             },
 
