@@ -2,6 +2,7 @@
 Copyright (c) 2015 DudeTeam. All rights reserved.
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="drag-and-drop-behavior.html">
 
 <!--
 `dude-hierarchy-item` is a Polymer element which represent an item in the hierarchy
@@ -97,6 +98,8 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
         DudeHierarchyItem = Polymer({
             is: "dude-hierarchy-item",
 
+            behaviors: [DragAndDropBehavior],
+
             properties: {
                 item: {
                     type: Object,
@@ -172,7 +175,8 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             listeners: {
                 "down": '_preventSelection',
                 "click": "_onClick",
-                "dblclick": "_onDblClick"
+                "dblclick": "_onDblClick",
+                "dropped": "_onDrop"
             },
 
             factoryImpl: function (item, isGroup) {
@@ -200,6 +204,18 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 
             _htmlChanged: function () {
                 this.$.name.innerHTML = this.html;
+            },
+
+            _onDrop: function() {
+                event.stopPropagation();
+                if (event.detail.on.group) {
+                  this.parentNode.removeChild(this);
+                  event.detail.on.pushItem(this);
+                }
+                else {
+                  this.parentNode.removeChild(this);
+                  event.detail.on.parentNode.insertBefore(this, event.detail.on);
+                }
             },
 
             _onClick: function (event) {
@@ -296,6 +312,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             isExpanded: function () {
                 return this._expanded;
             }
+
         });
     </script>
 
