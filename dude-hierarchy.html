@@ -141,6 +141,13 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 this.addOwnKeyBinding("right", "moveRight");
                 this.addOwnKeyBinding("left", "moveLeft");
                 this.addOwnKeyBinding("enter", "submit");
+                this.$["searchInput"].addEventListener("blur", function () {
+                    if (this._itemClicked) {
+                        this._itemClicked = false;
+                    } else {
+                        this.fire("dude-hierarchy-blur");
+                    }
+                }.bind(this));
             },
 
             moveUp: function () {
@@ -332,6 +339,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _onItemClick: function (event) {
+                this._itemClicked = true;
                 event.stopPropagation();
                 this.focus();
                 this._selectItem(event.target);
