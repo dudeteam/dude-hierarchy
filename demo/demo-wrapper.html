@@ -9,15 +9,18 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 
 <dom-module id="demo-wrapper">
     <style>
+        #screen {
+            background: var(--dude-primary-background-color);
+        }
         .panel {
-            background: #333333;
+            background: var(--dude-secondary-background-color);
             padding: 10px;
             margin: 10px;
         }
     </style>
 
     <template>
-        <div class="layout horizontal">
+        <div id="screen" class="layout horizontal fit">
             <div class="panel flex">
                 <dude-hierarchy id="hierarchyItems" items="{{ items }}"></dude-hierarchy>
             </div>
@@ -75,13 +78,6 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             behaviors: [Polymer.IronA11yKeysBehavior],
 
             ready: function () {
-                this.keyEventTarget = this.$.hierarchyItems;
-                this.addOwnKeyBinding("up", "_up");
-                this.addOwnKeyBinding("down", "_down");
-                this.addOwnKeyBinding("right", "_right");
-                this.addOwnKeyBinding("left", "_left");
-                this.addOwnKeyBinding("enter", "_submit");
-
                 this.$.hierarchyItems.addEventListener("dude-hierarchy-item-submit", function (e) {
                     console.log("Submitted: ", e.detail.item && e.detail.item.name);
                 });
@@ -95,28 +91,10 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 
             _addResource: function () {
                 this.push("resources", {"item": {"name": "added_resource.png"}});
-            },
-
-            _up: function () {
-                this.$.hierarchyItems.moveUp();
-            },
-
-            _down: function () {
-                this.$.hierarchyItems.moveDown();
-            },
-
-            _right: function () {
-                this.$.hierarchyItems.moveRight();
-            },
-
-            _left: function () {
-                this.$.hierarchyItems.moveLeft();
-            },
-
-            _submit: function () {
-                this.$.hierarchyItems.submit();
+                this.$.hierarchyResources.focus();
             }
-        })
+
+        });
 
     </script>
 

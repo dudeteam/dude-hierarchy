@@ -1,6 +1,6 @@
 {
   "name": "dude-hierarchy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Polymer element to create dynamically a hierarchy",
   "authors": [
     "Maxime Perrimond <max.perrimond@gmail.com>",
@@ -25,7 +25,7 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
     "font-awesome": "fontawesome#~4.4.0",
-    "dude-style": "*",
+    "dude-style": "~0.0.8",
     "dude-popup": "*"
   },
   "devDependencies": {

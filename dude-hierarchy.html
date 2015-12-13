@@ -3,6 +3,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 Authored by Maxime Perrimond <max.perrimond@gmail.com>
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
 <link rel="import" href="dude-hierarchy-item.html">
 
 <!--
@@ -62,7 +63,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
     </style>
 
     <template>
-        <div class="layout horizontal">
+        <div class="layout horizontal" id="root">
             <input class="flex" id="searchInput" type="text" placeholder="[[ placeholder ]]"
                    value="{{_argument::input}}">
             <a id="addItem" hidden$="[[ !editable ]]" on-click="_addItem"><i class="fa fa-plus-circle"></i></a>
@@ -75,6 +76,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
     <script>
         DudeHierarchy = Polymer({
             is: "dude-hierarchy",
+
+            behaviors: [Polymer.IronA11yKeysBehavior],
 
             properties: {
 
@@ -129,6 +132,15 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             focus: function () {
                 this.$.searchInput.blur();
                 this.$.searchInput.focus();
+            },
+
+            ready: function () {
+                this.keyEventTarget = this.$.root;
+                this.addOwnKeyBinding("up", "moveUp");
+                this.addOwnKeyBinding("down", "moveDown");
+                this.addOwnKeyBinding("right", "moveRight");
+                this.addOwnKeyBinding("left", "moveLeft");
+                this.addOwnKeyBinding("enter", "submit");
             },
 
             moveUp: function () {
@@ -300,9 +312,10 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             _selectFirstItem: function () {
                 var item = Polymer.dom(this).firstElementChild;
-                while (item && (!item.filtered || !(item.filtered && item.match))) {
-                    item = Polymer.dom(item).nextSibling;
-                }
+//                console.log(item);
+//                while (item && (!item.filtered || !(item.filtered && item.match))) {
+//                    item = Polymer.dom(item).nextSibling;
+//                }
                 this._selectItem(item);
             },
 
@@ -320,6 +333,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             _onItemClick: function (event) {
                 event.stopPropagation();
+                this.focus();
                 this._selectItem(event.target);
             },
 
