@@ -1,6 +1,6 @@
 {
   "name": "dude-hierarchy",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Polymer element to create dynamically a hierarchy",
   "authors": [
     "Maxime Perrimond <max.perrimond@gmail.com>",
@@ -23,14 +23,14 @@
     "README.md"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.0.0",
-    "font-awesome": "fontawesome#~4.4.0",
-    "dude-style": "~0.0.8",
-    "dude-popup": "*"
+    "polymer": "~1.2.3",
+    "font-awesome": "~4.5.0",
+    "dude-style": "~0.0.9",
+    "dude-popup": "~0.0.2"
   },
   "devDependencies": {
-    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
-    "iron-a11y-keys-behavior": "PolymerElements/iron-a11y-keys-behavior#^1.0.0",
-    "web-component-tester": "*"
+    "iron-component-page": "PolymerElements/iron-component-page#~1.1.4",
+    "iron-a11y-keys-behavior": "PolymerElements/iron-a11y-keys-behavior#~1.1.1",
+    "web-component-tester": "~4.1.0"
   }
 }
