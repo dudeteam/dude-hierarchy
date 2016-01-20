@@ -212,13 +212,15 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 
             _onDrop: function() {
                 event.stopPropagation();
-                if (event.detail.on.group) {
-                  this.parentNode.removeChild(this);
-                  event.detail.on.pushItem(this);
+                if (event.detail.on.isGroup()) {
+                    console.log("group", event.detail.on);
+                    this.parentNode.removeChild(this);
+                    event.detail.on.$.group.appendChild(this);
                 }
                 else {
-                  this.parentNode.removeChild(this);
-                  event.detail.on.parentNode.insertBefore(this, event.detail.on);
+                    console.log("none group", event.detail.on);
+                    this.parentNode.removeChild(this);
+                    event.detail.on.parentNode.insertBefore(this, event.detail.on);
                 }
             },
 

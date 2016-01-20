@@ -12,11 +12,6 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 <script>
     DragAndDropBehavior = {
         properties: {
-            droppable: {
-                type: Boolean,
-                value: true,
-                readOnly: true
-            },
 
             x: {
                 type: Number,
@@ -39,62 +34,79 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             }
         },
 
-    listeners: {
-          "track": "_onTrack"
-    },
+        listeners: {
+            "track": "_onTrack",
+            "mouseover": "_onOver"
+        },
 
-    _checkDragNDropElement: function (element) {
-        if (element.droppable) {
-            return element;
-        }
-        var parentElement = element.parentElement;
-        if (parentElement !== null) {
-            return this._checkDragNDropElement(parentElement);
-        }
-        return null;
-    },
+        _onOver: function(event) {
 
-    _onTrack: function (event) {
-      event.stopPropagation();
-      switch (event.detail.state) {
-        case "start":
-            this._saveAndInitState();
-        break;
-        case "track":
-            this.x += event.detail.ddx;
-            this.y += event.detail.ddy;
-            this.transform('translate(' + this.x + 'px, ' + this.y + 'px)');
-            this.style.transition = "opacity 250ms ease-in-out";
-            this.style.opacity = 0.5;
-        break;
-        case "end":
-            this._recoverState();
-            var hover = event.detail.hover();
-            hover = this._checkDragNDropElement(hover);
-            if (hover === null || hover === this) {
-              return;
+        },
+
+        _getRecursiveElement: function (element, type) {
+            if (element.tagName === type) {
+                return element;
             }
-            this.fire("dropped", {on:hover});
-        break;
-      }
-    },
+            var parentElement = element.parentElement;
+            if (parentElement !== null) {
+                return this._getRecursiveElement(parentElement, type);
+            }
+            return null;
+        },
 
-    _recoverState: function() {
-        this.style.opacity = this.opacity;
-        this.style.transition = this.transition;
-        this.x = 0;
-        this.y = 0;
-        this.transform('translate(' + this.x + 'px, ' + this.y + 'px)');
-    },
+        _getChildElement: function (element, id) {
+            for (var index = 0; index < element.childNodes.length; ++index) {
+                var e = element.childNodes[index];
+                console.log(e);
+                console.log(e.id, id);
+                if (e.id == id) {
+                    console.log(e.id, id);
+                    return e;
+                }
+            }
+            return null;
+        },
 
-    _saveAndInitState: function() {
-        this.x = 0;
-        this.y = 0;
-        this.opacity = this.style.opacity;
-        this.style.opacity = 0.5;
-        this.transition = this.style.transition;
-        this.style.transition = "opacity 250ms ease-in-out";
-    }
+        _onTrack: function (event) {
+            event.stopPropagation();
+            switch (event.detail.state) {
+                case "start":
+                    this._saveAndInitState();
+                    break;
+                case "track":
+                    this.x += event.detail.ddx;
+                    this.y += event.detail.ddy;
+                    this.transform('translate(' + this.x + 'px, ' + this.y + 'px)');
+                    this.style.transition = "opacity 250ms ease-in-out";
+                    this.style.opacity = 0.5;
+                    break;
+                case "end":
+                    this._recoverState();
+                    var hover = event.detail.hover();
+                    hover = this._getRecursiveElement(hover, "DUDE-HIERARCHY-ITEM");
+                    if (hover === null || hover === this) {
+                        return;
+                    }
+                    this.fire("dropped", {on:hover});
+                    break;
+            }
+        },
 
-};
+        _recoverState: function() {
+            this.style.opacity = this.opacity;
+            this.style.transition = this.transition;
+            this.x = 0;
+            this.y = 0;
+            this.transform('translate(' + this.x + 'px, ' + this.y + 'px)');
+        },
+
+        _saveAndInitState: function() {
+            this.x = 0;
+            this.y = 0;
+            this.opacity = this.style.opacity;
+            this.style.opacity = 0.5;
+            this.transition = this.style.transition;
+            this.style.transition = "opacity 250ms ease-in-out";
+        }
+    };
 </script>
