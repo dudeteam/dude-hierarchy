@@ -13,34 +13,19 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
     DudeDragAndDropBehavior = {
         properties: {
 
-            x: {
+            _opacity: {
                 type: Number,
                 value: undefined
             },
 
-            y: {
-                type: Number,
-                value: undefined
-            },
-
-            opacity: {
-                type: Number,
-                value: undefined
-            },
-
-            transition: {
-                type: String,
-                value: undefined
+            _currentTracking: {
+                type: Object,
+                value: null
             }
         },
 
         listeners: {
-            "track": "_onTrack",
-            "mouseover": "_onOver"
-        },
-
-        _onOver: function(event) {
-
+            "track": "_onTrack"
         },
 
         _getRecursiveElement: function (element, type) {
@@ -54,35 +39,28 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             return null;
         },
 
-        _getChildElement: function (element, id) {
-            for (var index = 0; index < element.childNodes.length; ++index) {
-                var e = element.childNodes[index];
-                console.log(e);
-                console.log(e.id, id);
-                if (e.id == id) {
-                    console.log(e.id, id);
-                    return e;
-                }
-            }
-            return null;
-        },
-
         _onTrack: function (event) {
             event.stopPropagation();
+            var hover = null;
             switch (event.detail.state) {
-                case "start":
-                    this._saveAndInitState();
-                    break;
                 case "track":
-                    this.x += event.detail.ddx;
-                    this.y += event.detail.ddy;
-                    this.transform('translate(' + this.x + 'px, ' + this.y + 'px)');
-                    this.style.transition = "opacity 250ms ease-in-out";
                     this.style.opacity = 0.5;
+                    hover = event.detail.hover();
+                    hover = this._getRecursiveElement(hover, "DUDE-HIERARCHY-ITEM");
+                    if (hover === null || hover === this) {
+                        return;
+                    }
+                    if (this._currentTracking != hover) {
+                        if (this._currentTracking != null) {
+                            this.fire("undrag-over", {on: this._currentTracking});
+                        }
+                        this._currentTracking = hover;
+                        this.fire("drag-over", {on: this._currentTracking});
+                    }
                     break;
                 case "end":
-                    this._recoverState();
-                    var hover = event.detail.hover();
+                    this.style.opacity = 1.0;
+                    hover = event.detail.hover();
                     hover = this._getRecursiveElement(hover, "DUDE-HIERARCHY-ITEM");
                     if (hover === null || hover === this) {
                         return;
@@ -92,21 +70,5 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             }
         },
 
-        _recoverState: function() {
-            this.style.opacity = this.opacity;
-            this.style.transition = this.transition;
-            this.x = 0;
-            this.y = 0;
-            this.transform('translate(' + this.x + 'px, ' + this.y + 'px)');
-        },
-
-        _saveAndInitState: function() {
-            this.x = 0;
-            this.y = 0;
-            this.opacity = this.style.opacity;
-            this.style.opacity = 0.5;
-            this.transition = this.style.transition;
-            this.style.transition = "opacity 250ms ease-in-out";
-        }
     };
 </script>
