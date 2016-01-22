@@ -13,22 +13,36 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
     DudeDragAndDropBehavior = {
         properties: {
 
-            _opacity: {
-                type: Number,
-                value: undefined
-            },
-
-            _currentTracking: {
+            _state: {
                 type: Object,
-                value: null
+                value: {
+                    "x": 0,
+                    "y": 0,
+                    "clickX": 0,
+                    "clickY": 0,
+                    "emplacement": null,
+                    "currentTarget": null,
+                    "lastParent": null,
+                    "lastNeighbour": null
+                }
             }
+
         },
 
         listeners: {
             "track": "_onTrack"
         },
 
+        ready: function() {
+            this._state.emplacement = document.createElement("div");
+            this._state.emplacement.style.height = "1.5em";
+            this._state.emplacement.style.width = "100%";
+        },
+
         _getRecursiveElement: function (element, type) {
+            if (element == null || element.tagName == undefined || element.tagName == null) {
+                return null;
+            }
             if (element.tagName === type) {
                 return element;
             }
@@ -39,33 +53,99 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             return null;
         },
 
+        _getHover: function(event) {
+            var hover = event.detail.hover();
+            hover = this._getRecursiveElement(hover, "DUDE-HIERARCHY-ITEM");
+            if (hover === null || hover === this) {
+                return null;
+            }
+            return hover;
+        },
+
+        _updatePosition: function (event) {
+            this._state.x = this._state.clickX + event.detail.dx;
+            this._state.y = this._state.clickY + event.detail.dy;
+            this.transform("translate(" + this._state.x + "px, " + this._state.y + "px)");
+            this.style.visibility = "visible";
+        },
+
+        _saveCurrentTarget: function (hover) {
+            if (this._state.currentTarget != hover) {
+                if (this._state.currentTarget != null && this._state.emplacement.parentNode != null) {
+                    this._state.emplacement.parentNode.removeChild(this._state.emplacement);
+                }
+                if (hover.parentNode != null) {
+                    if (hover.isGroup != undefined && hover.isGroup()) {
+                        hover.expand();
+                    }
+                    hover.parentNode.insertBefore(this._state.emplacement, hover);
+                }
+                this._state.currentTarget = hover;
+            }
+        },
+
+        _resetEmplacement: function () {
+            this.style.transform = "translate(0px, 0px)";
+            if (this._state.emplacement.parentNode != null) {
+                this._state.emplacement.parentNode.removeChild(this._state.emplacement);
+            }
+        },
+
+        _placeInsideEmptyFolder: function (event) {
+            var hoverItem = this._getHover(event);
+            if (hoverItem != null && hoverItem.isGroup != undefined && hoverItem.isGroup() && hoverItem.isEmpty()) {
+                hoverItem.$.group.appendChild(this);
+                this._resetEmplacement();
+                return true;
+            }
+            return false;
+        },
+
+        _revokeEmplacement: function () {
+            if (this._state.lastParent != null) {
+                this._state.lastParent.insertBefore(this, this._state.lastNeighbour);
+            }
+            this._resetEmplacement();
+        },
+
         _onTrack: function (event) {
             event.stopPropagation();
             var hover = null;
             switch (event.detail.state) {
-                case "track":
-                    this.style.opacity = 0.5;
-                    hover = event.detail.hover();
-                    hover = this._getRecursiveElement(hover, "DUDE-HIERARCHY-ITEM");
-                    if (hover === null || hover === this) {
-                        return;
-                    }
-                    if (this._currentTracking != hover) {
-                        if (this._currentTracking != null) {
-                            this.fire("undrag-over", {on: this._currentTracking});
-                        }
-                        this._currentTracking = hover;
-                        this.fire("drag-over", {on: this._currentTracking});
+                case "start":
+                    this._state.clickX = event.detail.x;
+                    this._state.clickY = event.detail.y;
+                    if (this.parentNode != null) {
+                        this._state.lastParent = this.parentNode;
+                        this._state.lastNeighbour = this.nextSibling;
+                        this.parentNode.removeChild(this);
+                        this.style.visibility = "hidden";
+                        document.body.appendChild(this);
                     }
                     break;
-                case "end":
-                    this.style.opacity = 1.0;
-                    hover = event.detail.hover();
-                    hover = this._getRecursiveElement(hover, "DUDE-HIERARCHY-ITEM");
-                    if (hover === null || hover === this) {
+                case "track":
+                    this._updatePosition(event);
+                    if (event.detail.hover() == this._state.emplacement || (hover = this._getHover(event)) == null) {
                         return;
                     }
-                    this.fire("dropped", {on:hover});
+                    this._saveCurrentTarget(hover);
+                    break;
+                case "end":
+                    this._state.currentTarget = null;
+                    if ((hover = event.detail.hover()) == null) {
+                        this._revokeEmplacement();
+                        return;
+                    }
+                    if (this._placeInsideEmptyFolder(event)) {
+                        return;
+                    }
+                    console.log(this._state.emplacement.parentNode, hover == this._state.emplacement, hover);
+                    if (hover == this._state.emplacement && this._state.emplacement.parentNode != null) {
+                        this._state.emplacement.parentNode.insertBefore(this, this._state.emplacement);
+                        this._resetEmplacement();
+                        return;
+                    }
+                    this._revokeEmplacement();
                     break;
             }
         },

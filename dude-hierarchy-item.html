@@ -22,7 +22,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             justify-content: flex-start;
             align-items: stretch;
             padding: 2px;
-            @apply(--dude-hierarchy-item)
+            @apply(--dude-hierarchy-item);
         }
         #item {
             display: flex;
@@ -204,6 +204,10 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             _onDrop: function (event) {
                 event.stopPropagation();
                 var on = event.detail.on;
+                var emp = event.detail.emp;
+                if (emp.parentNode != null) {
+                    emp.parentNode.removeChild(emp);
+                }
                 if (on == null) {
                     return;
                 }
@@ -222,23 +226,25 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             _onDragOver: function (event) {
                 event.stopPropagation();
                 var on = event.detail.on;
+                var emp = event.detail.emp;
                 if (on == null) {
                     return;
                 }
                 if (on.isGroup()) {
                     on.expand();
-                    on.$.group.appendChild(this);
+                    on.$.group.appendChild(emp);
                 } else {
                     if (on.parentNode != null && !this.findChildInGroup(this, on)) {
-                        on.parentNode.insertBefore(this, on);
+                        on.parentNode.insertBefore(emp, on);
                     }
                 }
             },
 
             _onUnDragOver: function (event) {
                 event.stopPropagation();
-                if (this.parentNode != null) {
-                    this.parentNode.removeChild(this);
+                var emp = event.detail.emp;
+                if (emp.parentNode != null) {
+                    emp.parentNode.removeChild(emp);
                 }
             },
 
@@ -287,6 +293,15 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                         }
                     }.bind(this))
                 }
+            },
+
+            isEmpty: function () {
+                for (var index = 0; index < this.$.group.childNodes.length; ++index) {
+                    if (this.$.group.childNodes[index].tagName == "DUDE-HIERARCHY-ITEM") {
+                        return false;
+                    }
+                }
+                return true;
             },
 
             expand: function () {

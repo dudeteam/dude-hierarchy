@@ -13,9 +13,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 @demo demo/index.html
 -->
 <dom-module id="dude-hierarchy">
-
     <style>
-
         :host {
             position: relative;
             display: flex;
@@ -24,13 +22,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             justify-content: flex-start;
             align-items: stretch;
             flex: 1;
-            @apply(--dude-hierarchy)
+            @apply(--dude-hierarchy);
         }
-
         :host > label {
-            @apply(--dude-hierarchy-search-label)
+            @apply(--dude-hierarchy-search-label);
         }
-
         #searchInput {
             margin-bottom: 10px;
             padding: 5px;
@@ -45,21 +41,17 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             font-size: 1em;
             @apply(--dude-hierarchy-search-input);
         }
-
         #searchInput:focus {
             border-bottom: 2px solid var(--dude-primary-color);
         }
-
         #content {
             overflow: auto;
         }
-
         #addItem {
             padding: 8px 0 0 8px;
             color: var(--dude-secondary-text-color);
             cursor: pointer;
         }
-
     </style>
 
     <template>
