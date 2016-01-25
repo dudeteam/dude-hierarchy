@@ -102,6 +102,11 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
         },
 
         _revokeEmplacement: function () {
+            if (this._state.emplacement.parentNode != null) {
+                this._state.emplacement.parentNode.insertBefore(this, this._state.emplacement);
+                this._resetEmplacement();
+                return;
+            }
             if (this._state.lastParent != null) {
                 this._state.lastParent.insertBefore(this, this._state.lastNeighbour);
             }
@@ -124,10 +129,10 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                     }
                     break;
                 case "track":
-                    this._updatePosition(event);
                     if (event.detail.hover() == this._state.emplacement || (hover = this._getHover(event)) == null) {
                         return;
                     }
+                    this._updatePosition(event);
                     this._saveCurrentTarget(hover);
                     break;
                 case "end":
@@ -139,7 +144,6 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                     if (this._placeInsideEmptyFolder(event)) {
                         return;
                     }
-                    console.log(this._state.emplacement.parentNode, hover == this._state.emplacement, hover);
                     if (hover == this._state.emplacement && this._state.emplacement.parentNode != null) {
                         this._state.emplacement.parentNode.insertBefore(this, this._state.emplacement);
                         this._resetEmplacement();
