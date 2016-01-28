@@ -72,7 +72,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
         _saveCurrentTarget: function (hover) {
             if (this._state.currentTarget != hover) {
                 if (this._state.currentTarget != null && this._state.emplacement.parentNode != null) {
-                    this._state.emplacement.parentNode.removeChild(this._state.emplacement);
+                    Polymer.dom(this._state.emplacement.parentNode).removeChild(this._state.emplacement);
                 }
                 if (hover.parentNode != null) {
                     if (hover.isGroup != undefined && hover.isGroup()) {
@@ -87,14 +87,15 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
         _resetEmplacement: function () {
             this.style.transform = "translate(0px, 0px)";
             if (this._state.emplacement.parentNode != null) {
-                this._state.emplacement.parentNode.removeChild(this._state.emplacement);
+                Polymer.dom(this._state.emplacement.parentNode).removeChild(this._state.emplacement);
             }
         },
 
         _placeInsideEmptyFolder: function (event) {
             var hoverItem = this._getHover(event);
             if (hoverItem != null && hoverItem.isGroup != undefined && hoverItem.isGroup() && hoverItem.isEmpty()) {
-                hoverItem.$.group.appendChild(this);
+                Polymer.dom(hoverItem).appendChild(this);
+                hoverItem.handleExpandIcon();
                 this._resetEmplacement();
                 return true;
             }
@@ -102,15 +103,11 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
         },
 
         _revokeEmplacement: function () {
-            if (this._state.emplacement.parentNode != null) {
+            if (this._state.emplacement.parentNode != null && this._state.emplacement != null) {
                 this._state.emplacement.parentNode.insertBefore(this, this._state.emplacement);
                 this._resetEmplacement();
                 return;
             }
-            if (this._state.lastParent != null) {
-                this._state.lastParent.insertBefore(this, this._state.lastNeighbour);
-            }
-            this._resetEmplacement();
         },
 
         _onTrack: function (event) {
@@ -123,7 +120,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                     if (this.parentNode != null) {
                         this._state.lastParent = this.parentNode;
                         this._state.lastNeighbour = this.nextSibling;
-                        this.parentNode.removeChild(this);
+                        Polymer.dom(Polymer.dom(this).parentNode).removeChild(this);
                         this.style.visibility = "hidden";
                         document.body.appendChild(this);
                     }
@@ -138,8 +135,10 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                 case "end":
                     this._state.currentTarget = null;
                     if ((hover = event.detail.hover()) == null) {
-                        this._revokeEmplacement();
-                        return;
+                        if (this._state.lastParent != null) {
+                            this._state.lastParent.insertBefore(this, this._state.lastNeighbour);
+                        }
+                        this._resetEmplacement();
                     }
                     if (this._placeInsideEmptyFolder(event)) {
                         return;

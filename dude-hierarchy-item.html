@@ -168,12 +168,8 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             listeners: {
                 "down": '_preventSelection',
                 "click": "_onClick",
-                "dblclick": "_onDblClick",
-                "dropped": "_onDrop",
-                "drag-over": "_onDragOver",
-                "undrag-over": "_onUnDragOver"
+                "dblclick": "_onDblClick"
             },
-
             factoryImpl: function (item, isGroup) {
                 this._group = (isGroup !== undefined && isGroup);
                 this.item = item;
@@ -199,53 +195,6 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 
             _htmlChanged: function () {
                 this.$.name.innerHTML = this.html;
-            },
-
-            _onDrop: function (event) {
-                event.stopPropagation();
-                var on = event.detail.on;
-                var emp = event.detail.emp;
-                if (emp.parentNode != null) {
-                    emp.parentNode.removeChild(emp);
-                }
-                if (on == null) {
-                    return;
-                }
-                if (this.parentNode != null) {
-                    this.parentNode.removeChild(this);
-                }
-                if (on.isGroup()) {
-                    on.$.group.appendChild(this);
-                } else {
-                    if (on.parentNode != null && !this.findChildInGroup(this, on)) {
-                        on.parentNode.insertBefore(this, on);
-                    }
-                }
-            },
-
-            _onDragOver: function (event) {
-                event.stopPropagation();
-                var on = event.detail.on;
-                var emp = event.detail.emp;
-                if (on == null) {
-                    return;
-                }
-                if (on.isGroup()) {
-                    on.expand();
-                    on.$.group.appendChild(emp);
-                } else {
-                    if (on.parentNode != null && !this.findChildInGroup(this, on)) {
-                        on.parentNode.insertBefore(emp, on);
-                    }
-                }
-            },
-
-            _onUnDragOver: function (event) {
-                event.stopPropagation();
-                var emp = event.detail.emp;
-                if (emp.parentNode != null) {
-                    emp.parentNode.removeChild(emp);
-                }
             },
 
             _onClick: function (event) {
@@ -296,12 +245,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             },
 
             isEmpty: function () {
-                for (var index = 0; index < this.$.group.childNodes.length; ++index) {
-                    if (this.$.group.childNodes[index].tagName == "DUDE-HIERARCHY-ITEM") {
-                        return false;
-                    }
-                }
-                return true;
+                return Polymer.dom(this).children.length == 0;
             },
 
             expand: function () {
@@ -344,30 +288,24 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                 this.html = (this.item.name !== undefined) ? this.item.name : "";
             },
 
+            handleExpandIcon: function () {
+                if (this._group) {
+                    if (!this.isEmpty()) {
+                        this.$.expandIcon.style.opacity = 1;
+                    } else {
+                        this.$.expandIcon.style.opacity = 0;
+                    }
+                }
+            },
+
             isGroup: function () {
+                this.handleExpandIcon();
                 return this._group;
             },
 
             isExpanded: function () {
                 return this._expanded;
-            },
-
-            findChildInGroup: function (from, search) {
-                if (from.isGroup == undefined || !from.isGroup()) {
-                    return false;
-                }
-                var group = from.$.group;
-                for (var index = 0; index < group.childNodes.length; ++index) {
-                    var element = group.childNodes[index];
-                    if (element == search) {
-                        return true;
-                    }
-                    if (this.findChildInGroup(element, search)) {
-                        return true;
-                    }
-                }
-                return false;
-            },
+            }
 
         });
     </script>
