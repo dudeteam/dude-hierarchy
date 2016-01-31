@@ -9,24 +9,28 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 @behavior drag-and-drop-behavior
 @demo demo/index.html
 -->
+<style>
+    #drag-element {
+        position: fixed;
+        pointer-events: none;
+    }
+    #avatar {
+        height: 1.5em;
+    }
+</style>
 <script>
     DudeDragAndDropBehavior = {
         properties: {
-
-            _state: {
+            current: {
                 type: Object,
-                value: {
-                    "x": 0,
-                    "y": 0,
-                    "clickX": 0,
-                    "clickY": 0,
-                    "emplacement": null,
-                    "currentTarget": null,
-                    "lastParent": null,
-                    "lastNeighbour": null
-                }
-            }
+                observer: "currentChanged",
+                value: null
+            },
 
+            avatar: {
+                type: Object,
+                value: null
+            }
         },
 
         listeners: {
@@ -34,124 +38,92 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
         },
 
         ready: function() {
-            this._state.emplacement = document.createElement("div");
-            this._state.emplacement.style.height = "1.5em";
-            this._state.emplacement.style.width = "100%";
+            this.avatar = document.createElement("div");
+            this.avatar.id = "avatar";
         },
 
-        _getRecursiveElement: function (element, type) {
-            if (element == null || element.tagName == undefined || element.tagName == null) {
+        currentChanged: function (newValue, oldValue) {
+            if (oldValue && this.getNextHierarchyElement(this.avatar)) {
+                this.removeChildHierarchy(this.avatar);
+            }
+            if (newValue) {
+                this.insertBeforeHierarchy(this.avatar, newValue);
+            }
+        },
+
+        getNextHierarchyElement: function(element, rootAccepted) {
+            if (!element || !element.tagName) {
                 return null;
             }
-            if (element.tagName === type) {
+            if (element.tagName == "DUDE-HIERARCHY-ITEM" ||
+                    (rootAccepted && element.tagName == "DUDE-HIERARCHY")) {
                 return element;
             }
-            var parentElement = element.parentElement;
+            var parentElement = element.parentNode;
             if (parentElement !== null) {
-                return this._getRecursiveElement(parentElement, type);
+                return this.getNextHierarchyElement(parentElement, rootAccepted);
             }
             return null;
         },
 
-        _getHover: function(event) {
-            var hover = event.detail.hover();
-            hover = this._getRecursiveElement(hover, "DUDE-HIERARCHY-ITEM");
-            if (hover === null || hover === this) {
-                return null;
-            }
-            return hover;
-        },
-
-        _updatePosition: function (event) {
-            this._state.x = this._state.clickX + event.detail.dx;
-            this._state.y = this._state.clickY + event.detail.dy;
-            this.transform("translate(" + this._state.x + "px, " + this._state.y + "px)");
-            this.style.visibility = "visible";
-        },
-
-        _saveCurrentTarget: function (hover) {
-            if (this._state.currentTarget != hover) {
-                if (this._state.currentTarget != null && this._state.emplacement.parentNode != null) {
-                    Polymer.dom(this._state.emplacement.parentNode).removeChild(this._state.emplacement);
-                }
-                if (hover.parentNode != null) {
-                    if (hover.isGroup != undefined && hover.isGroup()) {
-                        hover.expand();
-                    }
-                    hover.parentNode.insertBefore(this._state.emplacement, hover);
-                }
-                this._state.currentTarget = hover;
+        removeChildHierarchy: function (element) {
+            if (element.parentNode) {
+                var parent = this.getNextHierarchyElement(element.parentNode, true);
+                Polymer.dom(parent).removeChild(element);
             }
         },
 
-        _resetEmplacement: function () {
-            this.style.transform = "translate(0px, 0px)";
-            if (this._state.emplacement.parentNode != null) {
-                Polymer.dom(this._state.emplacement.parentNode).removeChild(this._state.emplacement);
+        insertBeforeHierarchy: function (newElement, afterElement) {
+            if (afterElement.parentNode) {
+                var parent = this.getNextHierarchyElement(afterElement.parentNode, true);
+                Polymer.dom(parent).insertBefore(newElement, afterElement);
             }
         },
 
-        _placeInsideEmptyFolder: function (event) {
-            var hoverItem = this._getHover(event);
-            if (hoverItem != null && hoverItem.isGroup != undefined && hoverItem.isGroup() && hoverItem.isEmpty()) {
-                Polymer.dom(hoverItem).appendChild(this);
-                hoverItem.handleExpandIcon();
-                this._resetEmplacement();
-                return true;
-            }
-            return false;
+        resetPlace: function () {
+            this.id = this.id.replace("drag-element", "");
+            this.transform("translate(0px, 0px)");
+            this.removeChildHierarchy(this.avatar);
         },
 
-        _revokeEmplacement: function () {
-            if (this._state.emplacement.parentNode != null && this._state.emplacement != null) {
-                this._state.emplacement.parentNode.insertBefore(this, this._state.emplacement);
-                this._resetEmplacement();
-                return;
-            }
+        isAvatarPlaced: function () {
+            return this.getNextHierarchyElement(this.avatar.parentNode, true);
+        },
+
+        isOnDirectory: function (item) {
+            return item && item.isGroup();
         },
 
         _onTrack: function (event) {
             event.stopPropagation();
-            var hover = null;
+            var hover = event.detail.hover();
+            var item = this.getNextHierarchyElement(hover, false);
+            this.transform("translate(" + event.detail.dx + "px, " + event.detail.dy + "px)");
             switch (event.detail.state) {
                 case "start":
-                    this._state.clickX = event.detail.x;
-                    this._state.clickY = event.detail.y;
-                    if (this.parentNode != null) {
-                        this._state.lastParent = this.parentNode;
-                        this._state.lastNeighbour = this.nextSibling;
-                        Polymer.dom(Polymer.dom(this).parentNode).removeChild(this);
-                        this.style.visibility = "hidden";
-                        document.body.appendChild(this);
-                    }
+                    this.id = "drag-element";
                     break;
                 case "track":
-                    if (event.detail.hover() == this._state.emplacement || (hover = this._getHover(event)) == null) {
+                    if (!hover || !item) {
                         return;
                     }
-                    this._updatePosition(event);
-                    this._saveCurrentTarget(hover);
+                    if (this.current != item) {
+                        this.set("current", item);
+                        if (item.isGroup() && !item.isExpanded()) {
+                            item.expand();
+                        }
+                    }
                     break;
                 case "end":
-                    this._state.currentTarget = null;
-                    if ((hover = event.detail.hover()) == null) {
-                        if (this._state.lastParent != null) {
-                            this._state.lastParent.insertBefore(this, this._state.lastNeighbour);
-                        }
-                        this._resetEmplacement();
+                    if (this.isOnDirectory(item)) {
+                        Polymer.dom(item).appendChild(this);
+                    } else if (this.isAvatarPlaced()) {
+                        this.insertBeforeHierarchy(this, this.avatar);
                     }
-                    if (this._placeInsideEmptyFolder(event)) {
-                        return;
-                    }
-                    if (hover == this._state.emplacement && this._state.emplacement.parentNode != null) {
-                        this._state.emplacement.parentNode.insertBefore(this, this._state.emplacement);
-                        this._resetEmplacement();
-                        return;
-                    }
-                    this._revokeEmplacement();
+                    this.resetPlace();
                     break;
             }
-        },
+        }
 
     };
 </script>
