@@ -181,6 +181,10 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                 event.preventDefault();
             },
 
+            _isEmpty: function () {
+                return Polymer.dom(this).children.length == 0;
+            },
+
             _itemChanged: function () {
                 if (this.item !== null && typeof this.item === "object") {
                     this.resetHtml();
@@ -283,6 +287,14 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 
             resetHtml: function () {
                 this.html = (this.item.name !== undefined) ? this.item.name : "";
+            },
+
+            hideGroupIcon: function () {
+                if (this._isEmpty()) {
+                    this.$.expandIcon.style.opacity = 0;
+                }  else {
+                    this.$.expandIcon.style.opacity = 1;
+                }
             },
 
             isGroup: function () {
