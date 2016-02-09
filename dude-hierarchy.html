@@ -147,6 +147,9 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     this._selectFirstItem();
                 }
                 var previous = Polymer.dom(this._selectedItem).previousSibling;
+                if (!previous) {
+                    previous = Polymer.dom(this._selectItem).parentNode;
+                }
                 while (previous !== undefined && (previous.filtered && !previous.match)) {
                     previous = Polymer.dom(previous).previousSibling;
                 }
@@ -184,10 +187,10 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     }
                 }
                 var next = Polymer.dom(this._selectedItem).nextSibling;
-                while (next !== undefined && (next.filtered && !next.match)) {
+                while (next && (next.filtered && !next.match)) {
                     next = Polymer.dom(next).nextSibling;
                 }
-                if (next !== undefined) {
+                if (next && next.tagName) {
                     this._selectItem(next);
                     return;
                 }
