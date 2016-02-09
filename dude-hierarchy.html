@@ -197,14 +197,15 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 var parent = Polymer.dom(this._selectedItem).parentNode;
                 while (parent instanceof DudeHierarchyItem) {
                     next = Polymer.dom(parent).nextSibling;
-                    while (next !== undefined && (next.filtered && !next.match)) {
+                    while (!next && (next.filtered && !next.match)) {
                         next = Polymer.dom(next).nextSibling;
                     }
-                    if (next !== undefined) {
+                    if (next && next.tagName) {
                         this._selectItem(next);
                         return;
                     }
                     parent = Polymer.dom(parent).parentNode;
+                    console.log(parent);
                 }
             },
 
