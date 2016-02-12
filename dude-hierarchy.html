@@ -15,13 +15,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 <dom-module id="dude-hierarchy">
     <style>
         :host {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            flex-wrap: nowrap;
-            justify-content: flex-start;
-            align-items: stretch;
-            flex: 1;
+            @apply(--layout-vertical);
+            @apply(--layout-flex);
             @apply(--dude-hierarchy);
         }
         :host > label {
@@ -45,6 +40,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             border-bottom: 2px solid var(--dude-primary-color);
         }
         #content {
+            @apply(--layout-vertical-flex);
+            @apply(--layout-flex);
             overflow: auto;
         }
         #addItem {
@@ -150,15 +147,13 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 if (!previous) {
                     previous = Polymer.dom(this._selectItem).parentNode;
                 }
-                console.log(previous);
-                while (previous && (previous.filtered && !previous.match)) {
-                    console.log(previous);
+                while (previous !== undefined && (previous.filtered && !previous.match)) {
                     previous = Polymer.dom(previous).previousSibling;
                 }
-                if (previous) {
+                if (previous !== undefined) {
                     if (previous.isGroup() && previous.isExpanded()) {
                         var last = this._getLastFrom(previous);
-                        if (last) {
+                        if (last !== undefined) {
                             this._selectItem(last);
                             return;
                         }
@@ -318,12 +313,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             _selectFirstItem: function () {
                 var item = Polymer.dom(this).firstElementChild;
-                while (item && (!item.filtered || !(item.filtered && item.match))) {
-                    item = Polymer.dom(item).nextSibling;
-                }
-                if (item && item.tagName) {
-                    this._selectItem(item);
-                }
+//                console.log(item);
+//                while (item && (!item.filtered || !(item.filtered && item.match))) {
+//                    item = Polymer.dom(item).nextSibling;
+//                }
+                this._selectItem(item);
             },
 
             _selectItem: function (item) {
