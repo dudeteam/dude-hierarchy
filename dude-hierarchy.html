@@ -147,13 +147,15 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 if (!previous) {
                     previous = Polymer.dom(this._selectItem).parentNode;
                 }
-                while (previous !== undefined && (previous.filtered && !previous.match)) {
+                console.log(previous);
+                while (previous && (previous.filtered && !previous.match)) {
+                    console.log(previous);
                     previous = Polymer.dom(previous).previousSibling;
                 }
-                if (previous !== undefined) {
+                if (previous) {
                     if (previous.isGroup() && previous.isExpanded()) {
                         var last = this._getLastFrom(previous);
-                        if (last !== undefined) {
+                        if (last) {
                             this._selectItem(last);
                             return;
                         }
@@ -313,11 +315,12 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             _selectFirstItem: function () {
                 var item = Polymer.dom(this).firstElementChild;
-//                console.log(item);
-//                while (item && (!item.filtered || !(item.filtered && item.match))) {
-//                    item = Polymer.dom(item).nextSibling;
-//                }
-                this._selectItem(item);
+                while (item && (!item.filtered || !(item.filtered && item.match))) {
+                    item = Polymer.dom(item).nextSibling;
+                }
+                if (item && item.tagName) {
+                    this._selectItem(item);
+                }
             },
 
             _selectItem: function (item) {
