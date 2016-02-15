@@ -147,9 +147,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 if (!previous) {
                     previous = Polymer.dom(this._selectItem).parentNode;
                 }
-                console.log(previous);
                 while (previous && (previous.filtered && !previous.match)) {
-                    console.log(previous);
                     previous = Polymer.dom(previous).previousSibling;
                 }
                 if (previous) {
@@ -170,16 +168,17 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             moveDown: function () {
-                if (this._selectedItem === null) {
+                if (!this._selectedItem) {
                     this._selectFirstItem();
                 }
                 if (this._selectedItem.isGroup() && this._selectedItem.isExpanded()) {
                     var first = Polymer.dom(this._selectedItem).firstChild;
-                    if (first !== undefined) {
-                        while (first !== undefined && (first.filtered && !first.match)) {
+                    console.log(first);
+                    if (first) {
+                        while (first && (first.filtered && !first.match)) {
                             first = Polymer.dom(first).nextSibling;
                         }
-                        if (first !== undefined) {
+                        if (first && first.tagName) {
                             this._selectItem(first);
                             return;
                         }
@@ -196,7 +195,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 var parent = Polymer.dom(this._selectedItem).parentNode;
                 while (parent instanceof DudeHierarchyItem) {
                     next = Polymer.dom(parent).nextSibling;
-                    while (!next && (next.filtered && !next.match)) {
+                    while (next && (next.filtered && !next.match)) {
                         next = Polymer.dom(next).nextSibling;
                     }
                     if (next && next.tagName) {
@@ -237,13 +236,13 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             _getLastFrom: function (item) {
                 var last = item;
-                if (item.isGroup() && item.isExpanded() && Polymer.dom(item).lastElementChild !== undefined) {
+                if (item && item.isGroup() && item.isExpanded() && Polymer.dom(item).lastElementChild !== undefined) {
                     last = Polymer.dom(item).lastChild;
-                    while (last !== undefined && (last.filtered && !last.match)) {
+                    while (last && (last.filtered && !last.match)) {
                         last = Polymer.dom(last).previousSibling;
                     }
                     var lol = this._getLastFrom(last);
-                    if (lol !== undefined) {
+                    if (lol) {
                         last = lol;
                     }
                 }
