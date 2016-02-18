@@ -130,6 +130,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                             parent.hideGroupIcon();
                         }
                     }
+                    this.fire("dude-hierarchy-drop-outside", {element: this, x: event.detail.dx, y: event.detail.dy});
                     this.resetPlace();
                     break;
             }

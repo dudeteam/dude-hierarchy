@@ -105,7 +105,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 
             listeners: {
                 "dude-hierarchy-item-click": "_onItemClick",
-                "dude-hierarchy-item-dblclick": "_onItemDblClick"
+                "dude-hierarchy-item-dblclick": "_onItemDblClick",
+                "dude-hierarchy-drop-outside": "_onDropOutside"
             },
 
             observers: [
@@ -344,6 +345,10 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             _onItemDblClick: function (event) {
                 event.stopPropagation();
                 this.submit();
+            },
+
+            _onDropOutside: function (event) {
+                console.log("dispatch event");
             },
 
             _search: function () {

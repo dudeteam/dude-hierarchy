@@ -17,6 +17,10 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             padding: 10px;
             margin: 10px;
         }
+        #otherBlock {
+            height: 100px;
+            background: red;
+        }
     </style>
 
     <template>
@@ -30,6 +34,11 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                                 editable
                                 on-dude-hierarchy-add-item="_addResource">
                 </dude-hierarchy>
+            </div>
+            <div class="panel flex">
+                <div id="otherBlock">
+                    OTHER BLOCK
+                </div>
             </div>
         </div>
     </template>
@@ -86,6 +95,9 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                 });
                 this.$.hierarchyItems.addEventListener("dude-hierarchy-item-deselect", function (e) {
                     console.log("Deselected: ", e.detail.item && e.detail.item.name);
+                });
+                this.$.otherBlock.addEventListener("dude-hierarchy-drop-outside", function (e) {
+                    console.log("drop outside hierarchy: ", e.detail.element && e.detail.x && e.detail.y);
                 });
             },
 
