@@ -365,7 +365,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                                 element.match = false;
                             } else {
                                 element.filtered = true;
-                                var find = element.item.name.indexOf(searchPattern);
+                                console.log(element.item.name.toLowerCase());
+                                var find = element.item.name.toLowerCase().indexOf(searchPattern.toLowerCase());
                                 if (find !== -1) {
                                     element.html = [
                                         element.item.name.slice(0, find),
