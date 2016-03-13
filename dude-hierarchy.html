@@ -235,6 +235,25 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 }
             },
 
+            /**
+             * Filter callback to filter items in the hierarchy.
+             * @callback filterCallback
+             * @param {DudeHierarchyItem} element
+             */
+
+            /**
+             * Filter items in the hierarchy with a {filterCallback}.
+             * To reset the hierarchy, set the parameter of this function to NULL.
+             *
+             * @param {filterCallback} filter
+             */
+            filter: function (filter) {
+                this._filterItems(filter, Polymer.dom(this).childNodes);
+                if (this._selectedItem === null) {
+                    this._selectFirstItem();
+                }
+            },
+
             _getLastFrom: function (item) {
                 var last = item;
                 if (item && item.isGroup() && item.isExpanded() && Polymer.dom(item).lastElementChild !== undefined) {
@@ -352,14 +371,32 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _search: function () {
-                this._filterItems(this._argument, Polymer.dom(this).childNodes);
+                var filter = null;
+                if (this._argument !== "") {
+                    filter = function (element) {
+                        var pattern = this._cleanString(this._argument);
+                        var find = this._cleanString(element.item.name).indexOf(pattern);
+                        if (find !== -1) {
+                            element.html = [
+                                element.item.name.slice(0, find),
+                                "<span class=\"selected\">",
+                                element.item.name.slice(find, find + pattern.length),
+                                "</span>",
+                                element.item.name.slice(find + pattern.length)
+                            ].join("");
+                            return true;
+                        }
+                        return false
+                    }.bind(this);
+                }
+                this._filterItems(filter, Polymer.dom(this).childNodes);
                 if (this._selectedItem === null) {
                     this._selectFirstItem();
                 }
             },
 
             _cleanString: function(s) {
-                var r=s.toLowerCase();
+                var r = s.toLowerCase();
                 r = r.replace(new RegExp(/\s/g),"");
                 r = r.replace(new RegExp(/[àáâãäå]/g),"a");
                 r = r.replace(new RegExp(/æ/g),"ae");
@@ -375,27 +412,15 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 return r;
             },
 
-            _filterItems: function (searchPattern, elements) {
+            _filterItems: function (filter, elements) {
                 var found = false;
                 if (elements instanceof Array) {
                     for (var i = 0; i < elements.length; i++) {
                         var element = elements[i];
                         if (element instanceof DudeHierarchyItem) {
-                            if (searchPattern === "") {
-                                element.resetHtml();
-                                element.filtered = false;
-                                element.match = false;
-                            } else {
+                            if (typeof filter === 'function') {
                                 element.filtered = true;
-                                var find = this._cleanString(element.item.name).indexOf(this._cleanString(searchPattern));
-                                if (find !== -1) {
-                                    element.html = [
-                                        element.item.name.slice(0, find),
-                                        "<span class=\"selected\">",
-                                        element.item.name.slice(find, find + searchPattern.length),
-                                        "</span>",
-                                        element.item.name.slice(find + searchPattern.length)
-                                    ].join("");
+                                if (filter(element)) {
                                     element.match = true;
                                     found = true;
                                 } else {
@@ -406,9 +431,13 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                                         this._selectedItem = null;
                                     }
                                 }
+                            } else {
+                                element.resetHtml();
+                                element.filtered = false;
+                                element.match = false;
                             }
                             if (element.isGroup()) {
-                                if (this._filterItems(searchPattern, Polymer.dom(element).childNodes)) {
+                                if (this._filterItems(filter, Polymer.dom(element).childNodes)) {
                                     element.expand();
                                     element.match = true;
                                     found = true;
