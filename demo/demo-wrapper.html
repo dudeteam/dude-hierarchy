@@ -3,7 +3,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 -->
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
-<link rel="import" href="../../iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../dude-style/dude-style.html">
 <link rel="import" href="../dude-hierarchy.html">
 
@@ -32,6 +32,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                 <dude-hierarchy id="hierarchyResources"
                                 items="{{ resources }}"
                                 editable
+                                draggable="true"
                                 on-dude-hierarchy-add-item="_addResource">
                 </dude-hierarchy>
             </div>

@@ -2,6 +2,7 @@
 Copyright (c) 2015 DudeTeam. All rights reserved.
 -->
 <link rel="import" href="../polymer/polymer.html">
+
 <!--
 `drag-and-drop-behavior` is a Polymer behavior to enable drag and drop on hierarchy items.
 
@@ -94,8 +95,25 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             return item && item.isGroup();
         },
 
+        _isDraggable: function () {
+            var current, parent;
+            current = this;
+            while (typeof Polymer.dom(current).parentNode !== "undefined") {
+                parent = Polymer.dom(current).parentNode;
+                if (parent instanceof DudeHierarchy) {
+                    return parent.draggable;
+                } else if (!(parent instanceof DudeHierarchyItem)) {
+                    break;
+                }
+            }
+            return false;
+        },
+
         _onTrack: function (event) {
             event.stopPropagation();
+            if (!this._isDraggable()) {
+                return;
+            }
             var hover = event.detail.hover();
             var item = this.getNextHierarchyElement(hover, false);
             this.transform("translate(" + event.detail.dx + "px, " + event.detail.dy + "px)");

@@ -3,6 +3,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
 Authored by Maxime Perrimond <max.perrimond@gmail.com>
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
 <link rel="import" href="dude-hierarchy-item.html">
 
@@ -88,6 +89,11 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 },
 
                 editable: {
+                    type: Boolean,
+                    value: false
+                },
+
+                draggable: {
                     type: Boolean,
                     value: false
                 },
