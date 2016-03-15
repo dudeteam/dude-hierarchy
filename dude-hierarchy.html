@@ -98,8 +98,14 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                     value: false
                 },
 
+                _filter: {
+                    type: Object,
+                    value: null
+                },
+
                 _argument: {
                     type: String,
+                    value: "",
                     observer: "_search"
                 },
 
@@ -254,10 +260,12 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
              * @param {filterCallback} filter
              */
             filter: function (filter) {
-                this._filterItems(filter, Polymer.dom(this).childNodes);
-                if (this._selectedItem === null) {
-                    this._selectFirstItem();
+                if (typeof filter === "function") {
+                    this._filter = filter;
+                } else {
+                    this._filter = null;
                 }
+                this._search();
             },
 
             _getLastFrom: function (item) {
@@ -377,25 +385,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             },
 
             _search: function () {
-                var filter = null;
-                if (this._argument !== "") {
-                    filter = function (element) {
-                        var pattern = this._cleanString(this._argument);
-                        var find = this._cleanString(element.item.name).indexOf(pattern);
-                        if (find !== -1) {
-                            element.html = [
-                                element.item.name.slice(0, find),
-                                "<span class=\"selected\">",
-                                element.item.name.slice(find, find + pattern.length),
-                                "</span>",
-                                element.item.name.slice(find + pattern.length)
-                            ].join("");
-                            return true;
-                        }
-                        return false
-                    }.bind(this);
-                }
-                this._filterItems(filter, Polymer.dom(this).childNodes);
+                this._filterItems(Polymer.dom(this).childNodes);
                 if (this._selectedItem === null) {
                     this._selectFirstItem();
                 }
@@ -418,32 +408,51 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 return r;
             },
 
-            _filterItems: function (filter, elements) {
+            _filterItems: function (elements) {
                 var found = false;
                 if (elements instanceof Array) {
                     for (var i = 0; i < elements.length; i++) {
                         var element = elements[i];
                         if (element instanceof DudeHierarchyItem) {
-                            if (typeof filter === 'function') {
+                            element.resetHtml();
+                            element.filtered = false;
+                            element.match = false;
+                            if (this._filter !== null) {
                                 element.filtered = true;
-                                if (filter(element)) {
+                                if (this._filter(element)) {
                                     element.match = true;
                                     found = true;
                                 } else {
-                                    element.match = false;
-                                    element.resetHtml();
                                     if (this._selectedItem === element) {
                                         this._selectedItem.deselect();
                                         this._selectedItem = null;
                                     }
                                 }
-                            } else {
-                                element.resetHtml();
-                                element.filtered = false;
-                                element.match = false;
+                            }
+                            if (this._argument !== "") {
+                                element.filtered = true;
+                                var pattern = this._cleanString(this._argument);
+                                var find = this._cleanString(element.item.name).indexOf(pattern);
+                                if (find !== -1) {
+                                    element.html = [
+                                        element.item.name.slice(0, find),
+                                        "<span class=\"selected\">",
+                                        element.item.name.slice(find, find + pattern.length),
+                                        "</span>",
+                                        element.item.name.slice(find + pattern.length)
+                                    ].join("");
+                                    element.match = true;
+                                    found = true;
+                                } else {
+                                    element.match = false;
+                                    if (this._selectedItem === element) {
+                                        this._selectedItem.deselect();
+                                        this._selectedItem = null;
+                                    }
+                                }
                             }
                             if (element.isGroup()) {
-                                if (this._filterItems(filter, Polymer.dom(element).childNodes)) {
+                                if (this._filterItems(Polymer.dom(element).childNodes)) {
                                     element.expand();
                                     element.match = true;
                                     found = true;

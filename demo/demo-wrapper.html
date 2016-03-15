@@ -98,6 +98,9 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                 this.$.hierarchyItems.addEventListener("dude-hierarchy-item-deselect", function (e) {
                     console.log("Deselected: ", e.detail.item && e.detail.item.name);
                 });
+                this.$.hierarchyItems.filter(function (element) {
+                    return element.item.name.indexOf("item") !== -1;
+                });
                 this.$.otherBlock.addEventListener("dude-hierarchy-drop-outside", function (e) {
                     console.log("drop outside hierarchy: ", e.detail.element && e.detail.x && e.detail.y);
                 });
