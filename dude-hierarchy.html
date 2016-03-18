@@ -14,11 +14,9 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 @demo demo/index.html
 -->
 <dom-module id="dude-hierarchy">
-    <style include="iron-flex">
+    <style include="iron-flex"></style>
     <style>
         :host {
-            @apply(--layout-vertical);
-            @apply(--layout-flex);
             @apply(--dude-hierarchy);
         }
         :host > label {
@@ -42,8 +40,6 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             border-bottom: 2px solid var(--dude-primary-color);
         }
         #content {
-            @apply(--layout-vertical-flex);
-            @apply(--layout-flex);
             overflow: auto;
         }
         #addItem {
@@ -59,7 +55,7 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                    value="{{_argument::input}}">
             <a id="addItem" hidden$="[[ !editable ]]" on-click="_addItem"><i class="fa fa-plus-circle"></i></a>
         </div>
-        <div id="content">
+        <div class="layout vertical" id="content">
             <content></content>
         </div>
     </template>
