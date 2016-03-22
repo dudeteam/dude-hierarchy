@@ -183,7 +183,6 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                 }
                 if (this._selectedItem.isGroup() && this._selectedItem.isExpanded()) {
                     var first = Polymer.dom(this._selectedItem).firstChild;
-                    console.log(first);
                     if (first) {
                         while (first && (first.filtered && !first.match)) {
                             first = Polymer.dom(first).nextSibling;
@@ -213,7 +212,6 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
                         return;
                     }
                     parent = Polymer.dom(parent).parentNode;
-                    console.log(parent);
                 }
             },
 
