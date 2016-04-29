@@ -5,8 +5,8 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
+<link rel="import" href="../dude-style/dude-style.html">
 <link rel="import" href="dude-hierarchy-item.html">
-
 <!--
 `dude-hierarchy` is a Polymer element for dynamic hierarchies
 @group dude-hierarchy
@@ -30,21 +30,21 @@ Authored by Maxime Perrimond <max.perrimond@gmail.com>
             width: 100%;
             box-sizing: border-box;
             background: transparent;
-            border-bottom: 1px solid var(--dude-secondary-text-color);
-            color: var(--dude-content-text-color);
-            font-family: var(--dude-content-text-font, sans-serif);
+            border-bottom: 1px solid var(--dude-dark2-color);
+            color: var(--dude-light1-color);
+            font-family: var(--dude-font-content, sans-serif);
             font-size: 1em;
             @apply(--dude-hierarchy-search-input);
         }
         #searchInput:focus {
-            border-bottom: 2px solid var(--dude-primary-color);
+            border-bottom: 2px solid var(--dude-dark1-color);
         }
         #content {
             overflow: auto;
         }
         #addItem {
             padding: 8px 0 0 8px;
-            color: var(--dude-secondary-text-color);
+            color: var(--dude-light2-color);
             cursor: pointer;
         }
     </style>

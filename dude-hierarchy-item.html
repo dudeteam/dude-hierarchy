@@ -2,8 +2,9 @@
 Copyright (c) 2015 DudeTeam. All rights reserved.
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../dude-style/dude-style.html">
 <link rel="import" href="dude-drag-and-drop-behavior.html">
-
+<link rel="stylesheet" href="../font-awesome/css/font-awesome.css">
 <!--
 `dude-hierarchy-item` is a Polymer element which represent an item in the hierarchy
 @group dude-hierarchy
@@ -31,25 +32,21 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
             justify-content: flex-start;
             align-items: stretch;
             padding: 3px 0;
-            font-family: var(--dude-primary-text-font);
-            color: var(--dude-content-text-color);
+            font-family: var(--dude-font-content);
+            color: var(--dude-dark1-color);
         }
         :host(.hidden) {
             display: none !important;
         }
         :host(.selected) > #item {
-            background: var(--dude-primary-color);
-            color: var(--dude-primary-text-color);
+            background: var(--dude-status-info-color);
         }
         .icon {
             display: inline-block;
             width: 14px;
             height: 14px;
             padding: 0 2px;
-            color: var(--dude-secondary-text-color);
-        }
-        :host(.selected) > #item .icon {
-            color: var(--dude-primary-text-color);
+            color: var(--dude-dark1-color);
         }
         #group {
             padding-left: 24px;
@@ -66,10 +63,6 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
         #name {
             display: inline-block;
             padding-left: 15px;
-        }
-        #name ::content span.selected {
-            background: var(--dude-primary-color);
-            color: var(--dude-primary-text-color);
         }
     </style>
     <template>
@@ -97,6 +90,7 @@ Copyright (c) 2015 DudeTeam. All rights reserved.
                 item: {
                     type: Object,
                     value: null,
+                    reflectToAttribute: true,
                     observer: "_itemChanged"
                 },
 
